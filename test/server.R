@@ -21,7 +21,7 @@ bindEvent <- function(eventExpr, callback, env=parent.frame(), quoted=FALSE) {
 shinyServer(function(input, output, session) {
   
     runWN <- reactive({
-      if(input$run_wn > 1){
+      if(input$run_wn > 0){
          #system("ls -ltr")
          paste('Performing a system call...')
       }
