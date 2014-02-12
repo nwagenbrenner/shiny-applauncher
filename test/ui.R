@@ -31,17 +31,26 @@ shinyUI(bootstrapPage(
       maxBounds = list(list(17, -180), list(59, 180))
     )
   ),
+  
+  #row(
+    #tags$br(),
+    #col(1, tags$br()),
+    #col(2, img(src = "wn-icon.png", height = 72, width = 72))
+    #col(3, tags$br()),
+    #col(4, h2('Test WindNinja Interface'))
+  #),
 
   tags$div(
       class = "container",
       #tags$p(tags$br()),
     row(
-      col(8, h2('Test WindNinja Interface'))
+      tags$br(),
+      col(5, h2('Test WindNinja Interface')),
+      col(1, img(src = "wn-icon.png", height = 72, width = 72))
     ),
 
   tags$hr(),
 
-    
     #tags$br(),
     row(
       col(3,
