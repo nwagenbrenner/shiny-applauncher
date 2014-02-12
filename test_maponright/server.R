@@ -19,21 +19,50 @@ bindEvent <- function(eventExpr, callback, env=parent.frame(), quoted=FALSE) {
 }
 
 shinyServer(function(input, output, session) {
-  
+    runWNtextOut <- reactive({
+        if(input$run_wn == 1){
+            print("WindNinja is running...")
+        }
+    })
+    
+    output$wnRunningText <- renderText({
+        runWNtextOut()
+    })
+    
     runWN <- reactive({
-      if(input$run_wn > 0){
-         #system("ls -ltr")
-         paste('Running WindNinja...')
+      if(input$run_wn == 1){
+         L<-system2("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", "/home/natalie/windninja_trunk/test_runs/bigbutte_domainAvg.cfg", stdout=TRUE, stderr=TRUE)
+         paste(L, sep="\n")
       }
     })
     
+    runWN2 <- reactive({
+      if(input$run_wn == 1){
+         unlink ("wnpipe")
+         system("mkfifo wnpipe")
+         system("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli /home/natalie/windninja_trunk/test_runs/bigbutte_domainAvg.cfg > wnpipe &")
+         Sys.sleep (2)
+         fileName="wnpipe"
+         con=fifo(fileName,open="rt",blocking=TRUE)
+         linn = " "
+         while ( length(linn) > 0) {
+           linn=scan(con,nlines=1,what="character", sep=" ", quiet=TRUE)
+           cat(linn,"\n") #flush.console()
+         }
+         close(con)
+         unlink ("wnpipe") 
+       }
+    })
+    
+    
     output$wn_progress <- renderText({
-    runWN()
-  })
-
-  
+        runWN()
+    })
+    
   output$text1 <- renderText({ 
-      paste("WindNinja messages can be directed here...")
+      paste("WindNinja messages could be directed here. Press the button and wait",
+             "for a few seconds (to let the run finish) to see the output below. Should be able to pipe this in line by line",
+             "so user can see status. For now it's just being read in as a full stream once the process ends.", collapse="")
     })
 
 

@@ -108,6 +108,7 @@ shinyUI(bootstrapPage(
       #col(3, actionButton('run_wn', strong('Run WindNinja', style = "color:blue"))),
       #col(8, textOutput("text1"))
       col(8, htmlOutput("text1"), style = "color:blue"),
+      #col(4, htmlOutput('wnRunningText')),
       col(4, htmlOutput('wn_progress'))
       )
       
