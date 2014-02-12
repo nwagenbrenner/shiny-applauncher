@@ -19,6 +19,25 @@ bindEvent <- function(eventExpr, callback, env=parent.frame(), quoted=FALSE) {
 }
 
 shinyServer(function(input, output, session) {
+  
+    runWN <- reactive({
+      if(input$run_wn > 1){
+         #system("ls -ltr")
+         paste('Performing a system call...')
+      }
+    })
+    
+    output$wn_progress <- renderText({
+    runWN()
+  })
+
+  
+  output$text1 <- renderText({ 
+      paste("WindNinja messages can be directed here...")
+    })
+
+
+
   # Create reactive values object to store our markers, so we can show 
   # their values in a table.
   values <- reactiveValues(markers = NULL)

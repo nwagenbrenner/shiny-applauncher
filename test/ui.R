@@ -44,9 +44,9 @@ shinyUI(bootstrapPage(
       class = "container",
       #tags$p(tags$br()),
     row(
-      tags$br(),
-      col(5, h2('Test WindNinja Interface')),
-      col(1, img(src = "wn-icon.png", height = 72, width = 72))
+      #tags$br(),
+      col(5, h2('Test WindNinja Interface'))
+      #col(1, img(src = "wn-icon.png", height = 72, width = 72))
     ),
 
   tags$hr(),
@@ -99,7 +99,10 @@ shinyUI(bootstrapPage(
       tags$hr(),
 
       row(
-      col(3, downloadButton('run_wn', 'Run WindNinja'))
+      col(3, actionButton('run_wn', strong('Run WindNinja', style = "color:blue"))),
+      #col(8, textOutput("text1"))
+      col(8, htmlOutput("text1"), style = "color:blue"),
+      col(4, htmlOutput('wn_progress'))
       )
       
     )
