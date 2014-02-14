@@ -1,5 +1,7 @@
 library(leaflet)
 library(maps)
+library(raster)
+library(plotGoogleMaps)
 
 #default max upload size is 5MB, increase to 30.
 options(shiny.maxRequestSize=30*1024^2)
@@ -75,17 +77,61 @@ shinyServer(function(input, output, session) {
     })
   
   writeCfg <- reactive({
-      cat("num_threads = 1\n",file="windninja.cfg")
+      cat("num_threads = 2\n",file="windninja.cfg")
+      cat(paste("vegetation = ", input$vegetation, "\n", collapse=""), file="windninja.cfg", append=TRUE)
       if(input$elevation == "boundingBox"){
           cat(paste("north = ", input$northExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
           cat(paste("south = ", input$southExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
           cat(paste("east = ", input$eastExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
           cat(paste("west = ", input$westExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
       }
-      else if(input$elevation == "uploadDem"){ #not sure about input$demFile$datapath...see ?inputFile
+      else if(input$elevation == "uploadDem"){ 
           cat(paste("elevation_file = ", input$demFile$datapath, "\n", collapse=""),file="windninja.cfg", append=TRUE)
       }
+      cat(paste("time_zone = ", input$timeZone, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+      cat(paste("initialization_method = ", input$initializationMethod, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+      if(input$initializationMethod == "domainAvg"){
+          cat(paste("input_wind_height = ", input$inputWindHeight, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+          cat(paste("units_input_wind_height = ", input$unitsInputWindHeight, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+          cat(paste("input_speed = ", input$inputSpeed, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+          cat(paste("input_speed_units = ", input$unitsInputSpeed, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+          cat(paste("input_direction = ", input$inputDirection, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+      }
+      cat(paste("output_wind_height = ", input$outputWindHeight, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+      cat(paste("units_output_wind_height = ", input$unitsOutputWindHeight, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+      cat(paste("mesh_choice = ", input$meshChoice, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+      if(input$outFire == 1 || input$outGoogleMaps == 1){
+          cat("write_ascii_output = true\n", file="windninja.cfg", append=TRUE)
+      }
+      if(input$outGoogleEarth == 1){
+          cat("write_goog_output = true\n", file="windninja.cfg", append=TRUE)
+      }
+      if(input$outShape == 1){
+          cat("write_shapefile_output = true\n", file="windninja.cfg", append=TRUE)
+      }
+      if(input$outVtk == 1){
+          cat("write_vtk_output = true\n", file="windninja.cfg", append=TRUE)
+      }
+      if(input$outGoogleMaps == 1){
+
+          spd<-raster('/home/natalie/test/big_butte_220_10_138m_vel.asc')
+          ang<-raster('/home/natalie/test/big_butte_220_10_138m_ang.asc')
+
+          #vectors<-brick(spd, ang)
+          #names(vectors)<-c("speed", "angle")
+
+          #vectors_sp<-rasterToPoints(vectors, spatial=TRUE)
+
+          #vectors_sp$angle<-vectors_sp$angle - 180
+          # if angle < 360, add 360
+          
+          #wind_vect=vectorsSP(vectors_sp, zcol=c('speed','angle'))
+
+          #pal<-colorRampPalette(c("blue","green","yellow", "orange", "red"))
+          #m=plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5), mapTypeId='HYBRID',strokeWeight=2)
+      }
   })
+
 
 #-------------------------------------------------------------
 #   create elevation input options (bb or dem upload)
@@ -141,6 +187,52 @@ shinyServer(function(input, output, session) {
   })
   output$demUploader <- renderUI({
       createDemUpload()
+  })
+
+
+#-------------------------------------------------------------
+#   create input wind fields for domain average runs
+#-------------------------------------------------------------
+  createHeightBox <- reactive({
+      if(input$initializationMethod == "domainAvg"){
+          textInputRow("inputWindHeight", "Input wind height", "20.0")
+      }
+  })
+  createUnitsHeightButtons <- reactive({
+      if(input$initializationMethod == "domainAvg"){
+          radioButtons("unitsInputWindHeight", "Units", c("ft" = "ft", "m" = "m"))
+      }
+  })
+  createInputSpeedBox <- reactive({
+      if(input$initializationMethod == "domainAvg"){
+          textInputRow("inputSpeed", "Wind speed", "0.0")
+      }
+  })
+  createUnitsSpeedButtons <- reactive({
+      if(input$initializationMethod == "domainAvg"){
+          radioButtons("unitsInputSpeed", "Units", c("mph" = "mph", "mps" = "mps"))
+      }
+  })
+  createDirectionBox <- reactive({
+      if(input$initializationMethod == "domainAvg"){
+          textInputRow("inputDirection", "Wind direction", "0")
+      }
+  })
+  
+  output$inputHeightField <- renderUI({
+      createHeightBox()
+  })
+  output$unitsInputHeightField <- renderUI({
+      createUnitsHeightButtons()
+  })
+  output$inputSpeedField <- renderUI({
+      createInputSpeedBox()
+  })
+  output$unitsInputSpeedField <- renderUI({
+      createUnitsSpeedButtons()
+  })
+  output$inputDirectionField <- renderUI({
+      createDirectionBox()
   })
   
 
