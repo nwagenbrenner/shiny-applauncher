@@ -3,6 +3,8 @@ library(ShinyDash)
 #install_github('ShinyDash', 'trestletech')
 #install_github('leaflet-shiny', 'jcheng5')
 
+t<-read.table('date_time_zonespec.csv', header=TRUE, sep=",", stringsAsFactors=FALSE)
+
 row <- function(...) {
   tags$div(class="row", ...)
 }
@@ -16,6 +18,13 @@ actionLink <- function(inputId, ...) {
          id=inputId,
          class='action-button',
          ...)
+}
+
+textInputRow<-function (inputId, label, value = "") 
+{
+    div(style="display:inline-block",
+        tags$label(label, `for` = inputId), 
+        tags$input(id = inputId, type = "text", value = value, class="input-small"))
 }
 
 shinyUI(bootstrapPage(
@@ -53,46 +62,60 @@ shinyUI(bootstrapPage(
 
     #tags$br(),
     row(
-      col(3,
+      col(2.5,
         h4('1. Input'),
         selectInput("elevation", "Elevation input:",
                 list("Select from map" = "swoopMap",
                      "Upload DEM" = "uploadDem", 
                      "Enter bounding box coordinates" = "boundingBox")),
-                     
+                             
         htmlOutput("demUploader"),
+        htmlOutput("nField"),
+        htmlOutput("sField"),
+        htmlOutput("wField"),
+        htmlOutput("eField"),
 
+        
+    
+        selectInput("initializationMethod", "Simulation type:",
+                list("Domain average" = "domainAvg", 
+                     "Point initialization" = "pointInitialization",
+                     "Weather model" = "wxModel")),
+        
+        htmlOutput("inputHeightField"),
+
+        htmlOutput("unitsInputHeightField"),
+
+
+        htmlOutput("inputSpeedField"),
+        htmlOutput("unitsInputSpeedField"),
+        htmlOutput("inputDirectionField")
+
+      ),
+      col(3,
+        tags$br(),
+        tags$br(),
         selectInput("vegetation", "Vegetation type:",
                 list("Grass" = "grass", 
                      "Shrubs" = "shrubs",
                      "Trees" = "trees")),
-    
-        selectInput("runType", "Simulation type:",
-                list("Domain average" = "domainAvg", 
-                     "Point initialization" = "pointInitialization",
-                     "Weather model" = "wxModel"))
-      ),
-      col(2,
-        htmlOutput("addExtraSpace"),
-        htmlOutput("addExtraSpace2"), 
-        htmlOutput("nField"),
-        htmlOutput("sField"),
-        htmlOutput("wField"),
-        htmlOutput("eField")
-      ),
-      
-      col(3,
-        h4('2. Additional options'),
-        selectInput("meshResolution", "Mesh resolution:",
+        selectInput("meshChoice", "Mesh choice:",
                 list("Fine" = "fine", 
                      "Medium" = "medium",
                      "Coarse" = "coarse")),
+        textInputRow("outputWindHeight", "Output wind height", "10.0"),
+        radioButtons("unitsOutputWindHeight", "Units", c("ft" = "ft", "m" = "m"))
+      ),
+     
+      col(3,
+        h4('2. Additional options'),
         selectInput("timeZone", "Time zone:",
-                list("America/Boise" = "america_boise")),
+                c(t$ID[1:length(t$ID)]),
+                t$ID[65]
+                ),
         tags$br(),
         tags$br(),
         checkboxInput("dirunalInput", "Use dirunal wind", FALSE),
-        #tags$br(),
         checkboxInput("stabilityInput", "Use non-neutral stability", FALSE),
         tags$br()
 
@@ -124,6 +147,8 @@ shinyUI(bootstrapPage(
       col(3, HTML('<a href="http://www.firemodels.org/index.php/windninja-introduction">About WindNinja</a>')),
       col(3, HTML('<a href="http://www.firemodels.org/index.php/windninja-support/windninja-contact-us">Contact</a>')),
       col(3, HTML('<a href="https://collab.firelab.org/software/projects/windninja">Development</a>'))
-      )
+      ),
+      
+      tags$br()
     ) #end tags$div(class='container') 
 ))
