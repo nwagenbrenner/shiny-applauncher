@@ -1,8 +1,6 @@
 library(leaflet)
-library(ggplot2)
 library(maps)
 
-data(uspop2000)
 
 # From a future version of Shiny
 bindEvent <- function(eventExpr, callback, env=parent.frame(), quoted=FALSE) {
@@ -18,25 +16,123 @@ bindEvent <- function(eventExpr, callback, env=parent.frame(), quoted=FALSE) {
   }))
 }
 
+textInputRow<-function (inputId, label, value = "") 
+{
+    div(style="display:inline-block",
+        tags$label(label, `for` = inputId), 
+        tags$input(id = inputId, type = "text", value = value, class="input-small"))
+}
+
+#----------------------------------------------------
+#     server logic
+#----------------------------------------------------
 shinyServer(function(input, output, session) {
-  
+     
     runWN <- reactive({
-      if(input$run_wn > 0){
-         #system("ls -ltr")
-         paste('Performing a system call...')
+      if(input$run_wn == 1){
+         writeCfg()
+         L<-system2("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", 
+                    "/home/natalie/windninja_trunk/test_runs/bigbutte_domainAvg.cfg", 
+                    stdout=TRUE, stderr=TRUE)
+         paste(L, sep="\n")
       }
     })
     
+    #attempt to pipe unbuffered WN stdout to UI
+    runWN2 <- reactive({
+      if(input$run_wn == 1){
+         unlink ("wnpipe")
+         system("mkfifo wnpipe")
+         system(paste("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", 
+                "/home/natalie/windninja_trunk/test_runs/bigbutte_domainAvg.cfg > wnpipe &",
+                collapse=""))
+         Sys.sleep (2)
+         fileName="wnpipe"
+         con=fifo(fileName,open="rt",blocking=TRUE)
+         linn = " "
+         while ( length(linn) > 0) {
+           linn=scan(con,nlines=1,what="character", sep=" ", quiet=TRUE)
+           cat(linn,"\n") #flush.console()
+         }
+         close(con)
+         unlink ("wnpipe") 
+       }
+    })
+    
     output$wn_progress <- renderText({
-    runWN()
+        runWN()
+    })
+    
+  output$text1 <- renderText({ 
+      paste("WindNinja messages could be directed here. Press the button and wait",
+             "for a few seconds (to let the run finish) to see the output below.",
+             "Should be able to pipe this in line by line",
+             "so user can see status. For now it's just being read in as a full",
+             "stream once the process ends.", collapse="")
+    })
+  
+  writeCfg <- reactive({
+      cat("num_threads = 1\n",file="windninja.cfg")
+      if(input$elevation == "boundingBox"){
+          cat(paste("north = ", input$northExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
+          cat(paste("south = ", input$southExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
+          cat(paste("east = ", input$eastExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
+          cat(paste("west = ", input$westExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
+      }
+      else if(input$elevation == "uploadDem"){ #not sure about input$demFile$datapath...see ?inputFile
+          cat(paste("elevation_file = ", input$demFile$datapath, "\n", collapse=""),file="windninja.cfg", append=TRUE)
+      }
   })
 
+  setDem <- reactive({
+      if(input$elevation == "boundingBox"){
+          output$addExtraSpace <- renderUI({
+              tags$br()
+          })
+          output$addExtraSpace2 <- renderUI({
+              tags$br()
+          })
+          output$nField <- renderUI({
+              textInputRow("northExtent", "North:", "42.8342")
+          })
+          output$nHelp <- renderUI({
+              helpText("e.g., 42.8893", style = "color:grey")
+          })
+          output$sField <- renderUI({
+              textInputRow("southExtent", "South:", "42.8322")
+          })
+          output$wField <- renderUI({
+              textInputRow("westExtent", "West:", "-113.2423")
+          })
+          output$eField <- renderUI({
+              textInputRow("eastExtent", "East:", "-113.0294")
+          })
+      }
+      else if(input$elevation == "uploadDem"){
+          output$demUploader <- fileInput("demFile", "Upload DEM:", multiple=FALSE, accept=NULL)
+      }
+
+  })
   
-  output$text1 <- renderText({ 
-      paste("WindNinja messages can be directed here...")
-    })
-
-
+   output$addExtraSpace <- renderUI({
+        setDem()
+   })
+   output$addExtraSpace2 <- renderUI({
+        setDem()
+   })
+   output$nField <- renderUI({
+        setDem()
+   })
+   output$sField <- renderUI({
+        setDem()
+   })
+   output$wField <- renderUI({
+        setDem()
+   })
+   output$eField <- renderUI({
+        setDem()
+   })
+   
 
   # Create reactive values object to store our markers, so we can show 
   # their values in a table.

@@ -59,6 +59,7 @@ shinyUI(bootstrapPage(
                 list("Select from map" = "swoopMap",
                      "Upload DEM" = "uploadDem", 
                      "Enter bounding box coordinates" = "boundingBox")),
+      
         tags$br(),
         selectInput("vegetation", "Vegetation type:",
                 list("Grass" = "grass", 
@@ -70,6 +71,18 @@ shinyUI(bootstrapPage(
                      "Point initialization" = "pointInitialization",
                      "Weather model" = "wxModel"))
       ),
+      col(2,
+        htmlOutput("addExtraSpace"),
+        htmlOutput("addExtraSpace2"), 
+        htmlOutput("nField"),
+        #htmlOutput("nHelp"),
+        htmlOutput("sField"),
+        htmlOutput("wField"),
+        htmlOutput("eField"),
+        #htmlOutput("northArg"),
+        
+        htmlOutput("demUploader")
+      ),
       
       col(3,
         h4('2. Additional options'),
@@ -80,30 +93,40 @@ shinyUI(bootstrapPage(
         selectInput("timeZone", "Time zone:",
                 list("America/Boise" = "america_boise")),
         tags$br(),
-        checkboxInput("dirunalInput", "Use dirunal wind", FALSE),
         tags$br(),
+        checkboxInput("dirunalInput", "Use dirunal wind", FALSE),
+        #tags$br(),
         checkboxInput("stabilityInput", "Use non-neutral stability", FALSE),
         tags$br()
 
       ),
       col(3,
         h4('3. Output'),
-        selectInput("outputFiles", "Output:",
-                list("Google Earth" = "google", 
-                     "Fire Behavior" = "fire",
-                     "Shape Files" = "shape",
-                     "VTK Files" = "vtk"))
+        h5("Choose output format(s):"),
+        checkboxInput("outGoogleMaps", "Google Maps", TRUE),
+        helpText(em("Viewable on your smart phone")), 
+        checkboxInput("outGoogleEarth", "Google Earth", FALSE), 
+        checkboxInput("outFire", "Fire Behavior", FALSE),
+        checkboxInput("outShape", "Shape Files", FALSE),
+        checkboxInput("outVtk", "VTK Files", FALSE)
       )
       ),
       
       tags$hr(),
 
       row(
-      col(3, actionButton('run_wn', strong('Run WindNinja', style = "color:blue"))),
-      #col(8, textOutput("text1"))
-      col(8, htmlOutput("text1"), style = "color:blue"),
+      col(0.5, h5("Start run!")),
+      col(2, actionButton('run_wn', img(src = "wn-icon.png", height = 40, width = 40))),
+      col(8, htmlOutput("text1"), style = "color:grey"),
       col(4, htmlOutput('wn_progress'))
-      )
+      ),
       
+      tags$hr(),
+
+      row(
+      col(3, HTML('<a href="http://www.firemodels.org/index.php/windninja-introduction">About WindNinja</a>')),
+      col(3, HTML('<a href="http://www.firemodels.org/index.php/windninja-support/windninja-contact-us">Contact</a>')),
+      col(3, HTML('<a href="https://collab.firelab.org/software/projects/windninja">Development</a>'))
+      )
     )
 ))
