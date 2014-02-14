@@ -1,6 +1,9 @@
 library(leaflet)
 library(maps)
 
+#default max upload size is 5MB, increase to 30.
+options(shiny.maxRequestSize=30*1024^2)
+
 
 # From a future version of Shiny
 bindEvent <- function(eventExpr, callback, env=parent.frame(), quoted=FALSE) {
@@ -84,55 +87,62 @@ shinyServer(function(input, output, session) {
       }
   })
 
-  setDem <- reactive({
+#-------------------------------------------------------------
+#   create elevation input options (bb or dem upload)
+#-------------------------------------------------------------
+  createSpace <- reactive({
       if(input$elevation == "boundingBox"){
-          output$addExtraSpace <- renderUI({
-              tags$br()
-          })
-          output$addExtraSpace2 <- renderUI({
-              tags$br()
-          })
-          output$nField <- renderUI({
-              textInputRow("northExtent", "North:", "42.8342")
-          })
-          output$nHelp <- renderUI({
-              helpText("e.g., 42.8893", style = "color:grey")
-          })
-          output$sField <- renderUI({
-              textInputRow("southExtent", "South:", "42.8322")
-          })
-          output$wField <- renderUI({
-              textInputRow("westExtent", "West:", "-113.2423")
-          })
-          output$eField <- renderUI({
-              textInputRow("eastExtent", "East:", "-113.0294")
-          })
+          tags$br()
       }
-      else if(input$elevation == "uploadDem"){
-          output$demUploader <- fileInput("demFile", "Upload DEM:", multiple=FALSE, accept=NULL)
+  })
+  createNbox <- reactive({
+      if(input$elevation == "boundingBox"){
+          textInputRow("northExtent", "North:", "42.8342")
       }
+  })
+  createSbox <- reactive({
+      if(input$elevation == "boundingBox"){
+          textInputRow("southExtent", "South:", "42.8322")
+      }
+  })
+  createEbox <- reactive({
+      if(input$elevation == "boundingBox"){
+          textInputRow("eastExtent", "East:", "-113.0294")
+      }
+  })
+  createWbox <- reactive({
+      if(input$elevation == "boundingBox"){
+          textInputRow("westExtent", "West:", "-113.2423")
+      }
+  })
+  createDemUpload <- reactive({
+      if(input$elevation == "uploadDem"){
+          fileInput("demFile", "Upload DEM:", multiple=FALSE, accept=NULL)
+      }
+  })
 
+  output$addExtraSpace <- renderUI({
+      createSpace()
+  })
+  output$addExtraSpace2 <- renderUI({
+      createSpace()
+  })
+  output$nField <- renderUI({
+      createNbox()
+  })
+  output$sField <- renderUI({
+      createSbox()
+  })
+  output$eField <- renderUI({
+      createEbox()
+  })
+  output$wField <- renderUI({
+      createWbox()
+  })
+  output$demUploader <- renderUI({
+      createDemUpload()
   })
   
-   output$addExtraSpace <- renderUI({
-        setDem()
-   })
-   output$addExtraSpace2 <- renderUI({
-        setDem()
-   })
-   output$nField <- renderUI({
-        setDem()
-   })
-   output$sField <- renderUI({
-        setDem()
-   })
-   output$wField <- renderUI({
-        setDem()
-   })
-   output$eField <- renderUI({
-        setDem()
-   })
-   
 
   # Create reactive values object to store our markers, so we can show 
   # their values in a table.

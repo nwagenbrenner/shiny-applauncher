@@ -23,8 +23,8 @@ shinyUI(bootstrapPage(
   tags$head(tags$link(rel='stylesheet', type='text/css', href='styles.css')),
   leafletMap(
     "map", "100%", 400,
-    initialTileLayer = "http://{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
-    initialTileLayerAttribution = HTML('Maps by <a href="http://www.mapbox.com/">Mapbox</a>'),
+    #initialTileLayer = "http://{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
+    #initialTileLayerAttribution = HTML('Maps by <a href="http://www.mapbox.com/">Mapbox</a>'),
     options=list(
       center = c(40.45, -110.85),
       zoom = 5,
@@ -59,8 +59,9 @@ shinyUI(bootstrapPage(
                 list("Select from map" = "swoopMap",
                      "Upload DEM" = "uploadDem", 
                      "Enter bounding box coordinates" = "boundingBox")),
-      
-        tags$br(),
+                     
+        htmlOutput("demUploader"),
+
         selectInput("vegetation", "Vegetation type:",
                 list("Grass" = "grass", 
                      "Shrubs" = "shrubs",
@@ -75,13 +76,9 @@ shinyUI(bootstrapPage(
         htmlOutput("addExtraSpace"),
         htmlOutput("addExtraSpace2"), 
         htmlOutput("nField"),
-        #htmlOutput("nHelp"),
         htmlOutput("sField"),
         htmlOutput("wField"),
-        htmlOutput("eField"),
-        #htmlOutput("northArg"),
-        
-        htmlOutput("demUploader")
+        htmlOutput("eField")
       ),
       
       col(3,
@@ -128,5 +125,5 @@ shinyUI(bootstrapPage(
       col(3, HTML('<a href="http://www.firemodels.org/index.php/windninja-support/windninja-contact-us">Contact</a>')),
       col(3, HTML('<a href="https://collab.firelab.org/software/projects/windninja">Development</a>'))
       )
-    )
+    ) #end tags$div(class='container') 
 ))
