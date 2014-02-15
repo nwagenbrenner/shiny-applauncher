@@ -65,10 +65,11 @@ shinyUI(bootstrapPage(
       col(2.5,
         h4('1. Input'),
         selectInput("elevation", "Elevation input:",
-                list("Select from map" = "swoopMap",
+                list(#"Select from map" = "swoopMap",
                      "Upload DEM" = "uploadDem", 
                      "Enter bounding box coordinates" = "boundingBox")),
                              
+        #textOutput("testMessage"),
         htmlOutput("demUploader"),
         htmlOutput("nField"),
         htmlOutput("sField"),
@@ -78,9 +79,9 @@ shinyUI(bootstrapPage(
         
     
         selectInput("initializationMethod", "Simulation type:",
-                list("Domain average" = "domainAvg", 
+                list("Domain average" = "domainAverageInitialization", 
                      "Point initialization" = "pointInitialization",
-                     "Weather model" = "wxModel")),
+                     "Weather model" = "wxModelInitialization")),
         
         htmlOutput("inputHeightField"),
 
@@ -137,7 +138,9 @@ shinyUI(bootstrapPage(
       row(
       col(0.5, h5("Start run!")),
       col(2, actionButton('run_wn', img(src = "wn-icon.png", height = 40, width = 40))),
-      col(8, htmlOutput("text1"), style = "color:grey"),
+      
+      col(8, textOutput("runSubmittedMessage"), style = "color:blue"),
+      col(8, textOutput("runFinishedMessage"), style = "color:blue"),
       col(4, htmlOutput('wn_progress'))
       ),
       
