@@ -165,7 +165,8 @@ shinyServer(function(input, output, session) {
           wind_vect=vectorsSP(vectors_sp, maxlength=200, zcol=c('speed','angle'))
 
           pal<-colorRampPalette(c("blue","green","yellow", "orange", "red"))
-          m=plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5), mapTypeId='HYBRID',strokeWeight=2)
+          m=plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5),
+                           mapTypeId='HYBRID',strokeWeight=1,openMap=FALSE)
       }
   })
 
