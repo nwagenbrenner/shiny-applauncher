@@ -22,14 +22,15 @@ actionLink <- function(inputId, ...) {
 
 textInputRow<-function (inputId, label, value = "") 
 {
-    div(style="display:inline-block",
+    div(
         tags$label(label, `for` = inputId), 
         tags$input(id = inputId, type = "text", value = value, class="input-small"))
 }
 
 shinyUI(bootstrapPage(
-
-  tags$head(tags$link(rel='stylesheet', type='text/css', href='styles.css')),
+  tags$head(tags$link(rel='stylesheet', type='text/css', href='styles.css'), 
+           tags$style("label.radio { display: inline-block; }", ".radio input[type=\"radio\"] { float: none; }")
+           ),
   leafletMap(
     "map", "100%", 400,
     #initialTileLayer = "http://{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
@@ -41,71 +42,66 @@ shinyUI(bootstrapPage(
     )
   ),
   
-  #row(
-    #tags$br(),
-    #col(1, tags$br()),
-    #col(2, img(src = "wn-icon.png", height = 72, width = 72))
-    #col(3, tags$br()),
-    #col(4, h2('Test WindNinja Interface'))
-  #),
 
   tags$div(
       class = "container",
-      #tags$p(tags$br()),
     row(
-      #tags$br(),
       col(5, h2('Test WindNinja Interface'))
-      #col(1, img(src = "wn-icon.png", height = 72, width = 72))
     ),
 
   tags$hr(),
 
-    #tags$br(),
     row(
-      col(2.5,
+      col(3.5,
         h4('1. Input'),
         selectInput("elevation", "Elevation input:",
                 list(#"Select from map" = "swoopMap",
                      "Upload DEM" = "uploadDem", 
                      "Enter bounding box coordinates" = "boundingBox")),
-                             
-        #textOutput("testMessage"),
-        htmlOutput("demUploader"),
-        htmlOutput("nField"),
-        htmlOutput("sField"),
-        htmlOutput("wField"),
-        htmlOutput("eField"),
 
+        htmlOutput("demUploader"),
         
+        div(style="display:inline-block", htmlOutput("nField")),
+        div(style="display:inline-block", htmlOutput("sField")),
+        tags$br(),
+        div(style="display:inline-block", htmlOutput("wField")),
+        div(style="display:inline-block", htmlOutput("eField")),
+        
+        tags$br(),
+        tags$br(),
     
         selectInput("initializationMethod", "Simulation type:",
                 list("Domain average" = "domainAverageInitialization", 
                      "Point initialization" = "pointInitialization",
                      "Weather model" = "wxModelInitialization")),
         
-        htmlOutput("inputHeightField"),
-
-        htmlOutput("unitsInputHeightField"),
-
-
-        htmlOutput("inputSpeedField"),
-        htmlOutput("unitsInputSpeedField"),
-        htmlOutput("inputDirectionField")
-
-      ),
-      col(3,
         tags$br(),
+        
+        div(style="display:inline-block", htmlOutput("inputHeightField")),
+        div(class="input-mini",style="display:inline-block",htmlOutput("unitsInputHeightField")),
+        
         tags$br(),
+
+        div(style="display:inline-block", htmlOutput("inputSpeedField")),
+        div(class="input-mini",style="display:inline-block; width: 20px;",htmlOutput("unitsInputSpeedField")),
+        
+        tags$br(),
+        
+        htmlOutput("inputDirectionField"),
+
         selectInput("vegetation", "Vegetation type:",
                 list("Grass" = "grass", 
                      "Shrubs" = "shrubs",
                      "Trees" = "trees")),
         selectInput("meshChoice", "Mesh choice:",
-                list("Fine" = "fine", 
+                list("Coarse" = "coarse",
                      "Medium" = "medium",
-                     "Coarse" = "coarse")),
-        textInputRow("outputWindHeight", "Output wind height", "10.0"),
-        radioButtons("unitsOutputWindHeight", "Units", c("ft" = "ft", "m" = "m"))
+                     "Fine" = "fine"
+                     )),
+        tags$br(),
+               
+        div(style = "display:inline-block ", htmlOutput("outputHeightField")),
+        div(style = "display:inline-block; width: 20%;",htmlOutput("unitsOutputHeightField"))
       ),
      
       col(3,
@@ -114,8 +110,7 @@ shinyUI(bootstrapPage(
                 c(t$ID[1:length(t$ID)]),
                 t$ID[65]
                 ),
-        tags$br(),
-        tags$br(),
+
         checkboxInput("dirunalInput", "Use dirunal wind", FALSE),
         checkboxInput("stabilityInput", "Use non-neutral stability", FALSE),
         tags$br()

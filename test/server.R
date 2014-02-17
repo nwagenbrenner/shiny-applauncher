@@ -6,7 +6,8 @@ library(plotGoogleMaps)
 #default max upload size is 5MB, increase to 30.
 options(shiny.maxRequestSize=30*1024^2)
 
-demFile = NULL
+demFile <- NULL
+
 
 # From a future version of Shiny
 bindEvent <- function(eventExpr, callback, env=parent.frame(), quoted=FALSE) {
@@ -24,10 +25,11 @@ bindEvent <- function(eventExpr, callback, env=parent.frame(), quoted=FALSE) {
 
 textInputRow<-function (inputId, label, value = "") 
 {
-    div(style="display:inline-block",
+    div(
         tags$label(label, `for` = inputId), 
         tags$input(id = inputId, type = "text", value = value, class="input-small"))
 }
+
 
 #----------------------------------------------------
 #     server logic
@@ -170,8 +172,6 @@ shinyServer(function(input, output, session) {
       }
   })
 
-    
-
   output$wn_progress <- renderText({
       runWN()
       convertToGoogleMaps() #writes the Google Maps File 
@@ -239,12 +239,15 @@ shinyServer(function(input, output, session) {
 #-------------------------------------------------------------
   createHeightBox <- reactive({
       if(input$initializationMethod == "domainAverageInitialization"){
-          textInputRow("inputWindHeight", "Input wind height", "20.0")
+          textInputRow("inputWindHeight", "Input height", "10.0")
       }
   })
   createUnitsHeightButtons <- reactive({
       if(input$initializationMethod == "domainAverageInitialization"){
-          radioButtons("unitsInputWindHeight", "Units", c("ft" = "ft", "m" = "m"))
+          #radioButtons("unitsInputWindHeight", "Units", c("ft" = "ft", "m" = "m"))
+          selectInput("unitsInputWindHeight", "Units:",
+                list("ft" = "ft", 
+                     "m" = "m"))
       }
   })
   createInputSpeedBox <- reactive({
@@ -254,13 +257,25 @@ shinyServer(function(input, output, session) {
   })
   createUnitsSpeedButtons <- reactive({
       if(input$initializationMethod == "domainAverageInitialization"){
-          radioButtons("unitsInputSpeed", "Units", c("mph" = "mph", "mps" = "mps"))
+          #radioButtons("unitsInputSpeed", "Units", c("mph" = "mph", "m/s" = "mps"))
+          selectInput("unitsInputSpeed", "Units:",
+                list("mph" = "mph", 
+                     "m/s" = "mps"))
       }
   })
   createDirectionBox <- reactive({
       if(input$initializationMethod == "domainAverageInitialization"){
           textInputRow("inputDirection", "Wind direction", "0")
       }
+  })
+  createOutputHeightBox <- reactive({
+      textInputRow("outputWindHeight", "Output height:", "10.0")
+  })
+  createUnitsOutputHeightButtons <- reactive({
+      #radioButtons("unitsOutputWindHeight", "Units", c("ft" = "ft", "m" = "m"))
+      selectInput("unitsOutputWindHeight", "Units:",
+                list("ft" = "ft", 
+                     "m" = "m"))
   })
   
   output$inputHeightField <- renderUI({
@@ -277,6 +292,12 @@ shinyServer(function(input, output, session) {
   })
   output$inputDirectionField <- renderUI({
       createDirectionBox()
+  })
+  output$outputHeightField <- renderUI({
+      createOutputHeightBox()
+  })
+  output$unitsOutputHeightField <- renderUI({
+      createUnitsOutputHeightButtons()
   })
   
 
