@@ -1,13 +1,14 @@
+library(shiny)
 library(leaflet)
 library(maps)
 library(raster)
 library(plotGoogleMaps)
+library(shinyIncubator)
 
 #default max upload size is 5MB, increase to 30.
 options(shiny.maxRequestSize=30*1024^2)
 
 demFile <- NULL
-
 
 # From a future version of Shiny
 bindEvent <- function(eventExpr, callback, env=parent.frame(), quoted=FALSE) {
@@ -38,7 +39,12 @@ shinyServer(function(input, output, session) {
      
     createSubmittedMessage <- reactive({
         if(input$run_wn == 1){
-            paste("WindNinja is running...", collapse="")
+            paste("WindNinja run status:", collapse="")
+            
+        }
+        else{
+            paste("Click the run button and watch here for messages indicating that the run has completed and\n",
+                  "the Google Maps output file has been created (if requested). This will take several seconds.", collapse="")
         }
     })
     
@@ -48,12 +54,17 @@ shinyServer(function(input, output, session) {
     
     runWN <- reactive({
       if(input$run_wn == 1){
+         unlink("windninja.cfg")
+         unlink("wind_vect.htm")
+         unlink("Legend*")
+         unlink("dem_*")
          writeCfg()
          L<-system2("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", "windninja.cfg",
                     stdout=TRUE, stderr=TRUE)
          paste(L, sep="\n")
       }
     })
+    
     
     createFinishedMessage <- reactive({
         if(input$run_wn == 1){
@@ -64,21 +75,24 @@ shinyServer(function(input, output, session) {
         }
     })
     
-    output$runFinshedMessage <- renderText({
-      createFinishedMessage()
+    #createDownloadButton <- reactive({
+#        if(input$run_wn == 1){
+#            downloadButton('downloadData', label = "Download Output Files", class=NULL)
+#        }
+#    })
+
+
+
+  output$wnText <- renderUI({
+      runWN()
   })
-  
-   
-   writeTestMessage <- reactive({
-       #paste("DEM file is set to: ", input$elevation, collapse="")
-        #paste("north extent set to: ", input$northExtent, collapse="")
-        #paste("Elevation file set to: ", input$demFile$datapath, collapse="")
-        paste("Elevation file set to: ", demFile, collapse="")
-   })
-   
-   output$testMessage <- renderText({
-        writeTestMessage()
-    })
+  output$convertToGoogleMapsText <- renderUI({
+      convertToGoogleMaps() #writes the Google Maps File 
+  })
+#  output$downloadOuput <- downloadHandler({     
+
+#  })    
+       
     
     #attempt to pipe unbuffered WN stdout to UI
 #    runWN2 <- reactive({
@@ -101,25 +115,41 @@ shinyServer(function(input, output, session) {
 #         unlink ("wnpipe") 
 #       }
 #    })
-      
   
+  createTestMessage <- reactive({
+      paste("input$demFile$datapath = ", input$demFile$datapath, collapse = "")
+  })
+  output$testMessage <- renderUI({
+      createTestMessage()
+  })
+      
   writeCfg <- reactive({
+  isolate({
       cat("num_threads = 2\n",file="windninja.cfg")
       cat(paste("vegetation = ", input$vegetation, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+
       if(input$elevation == "boundingBox"){
           cat(paste("north = ", input$northExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
           cat(paste("south = ", input$southExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
           cat(paste("east = ", input$eastExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
           cat(paste("west = ", input$westExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
       }
+
       else if(input$elevation == "uploadDem"){
           #move the file to working dir and rename
-          system(paste("mv ",  input$demFile$datapath, " dem.asc"))
+          if(length(input$demFile$datapath) == 2){
+              system(paste("mv ",  input$demFile$datapath[1], " dem.asc"))
+              system(paste("mv ",  input$demFile$datapath[2], " dem.prj"))
+          }
+          else{
+              system(paste("mv ",  input$demFile$datapath, " dem.asc"))
+          }
           demFile = "dem.asc"
           cat("elevation_file = dem.asc\n", file="windninja.cfg", append=TRUE)
       }
       cat(paste("time_zone = ", input$timeZone, "\n", collapse=""), file="windninja.cfg", append=TRUE)
       cat(paste("initialization_method = ", input$initializationMethod, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+
       if(input$initializationMethod == "domainAverageInitialization"){
           cat(paste("input_wind_height = ", input$inputWindHeight, "\n", collapse=""), file="windninja.cfg", append=TRUE)
           cat(paste("units_input_wind_height = ", input$unitsInputWindHeight, "\n", collapse=""), file="windninja.cfg", append=TRUE)
@@ -127,6 +157,7 @@ shinyServer(function(input, output, session) {
           cat(paste("input_speed_units = ", input$unitsInputSpeed, "\n", collapse=""), file="windninja.cfg", append=TRUE)
           cat(paste("input_direction = ", input$inputDirection, "\n", collapse=""), file="windninja.cfg", append=TRUE)
       }
+
       cat(paste("output_wind_height = ", input$outputWindHeight, "\n", collapse=""), file="windninja.cfg", append=TRUE)
       cat(paste("units_output_wind_height = ", input$unitsOutputWindHeight, "\n", collapse=""), file="windninja.cfg", append=TRUE)
       cat(paste("mesh_choice = ", input$meshChoice, "\n", collapse=""), file="windninja.cfg", append=TRUE)
@@ -142,12 +173,14 @@ shinyServer(function(input, output, session) {
       if(input$outVtk == 1){
           cat("write_vtk_output = true\n", file="windninja.cfg", append=TRUE)
       }
+      })
   })
 
 #-----------------------------------------------
 # convert ascii grids to Google Maps format
 #-----------------------------------------------
   convertToGoogleMaps <- reactive({  
+      #isolate({
       if(input$run_wn==1 && input$outGoogleMaps == 1){
           
           spdFiles<-system("ls -t | grep vel.asc", intern = TRUE)
@@ -168,13 +201,25 @@ shinyServer(function(input, output, session) {
 
           pal<-colorRampPalette(c("blue","green","yellow", "orange", "red"))
           m=plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5),
-                           mapTypeId='HYBRID',strokeWeight=1,openMap=FALSE)
+                           mapTypeId='HYBRID',strokeWeight=2,openMap=FALSE)
+                           
+          paste("Google Maps output written.")
+      }
+      #isolate})
+  })
+
+  displayMap <- reactive({  
+      if(input$run_wn==1 && input$outGoogleMaps == 1){
+          tags$iframe(
+              srcdoc = paste(readLines('wind_vect.htm'), collapse = '\n'),
+              width = "100%",
+              height = "600px"
+          )
       }
   })
 
-  output$wn_progress <- renderText({
-      runWN()
-      convertToGoogleMaps() #writes the Google Maps File 
+  output$mymap <- renderUI({
+      displayMap()
   })
 
 #-------------------------------------------------------------
@@ -207,7 +252,7 @@ shinyServer(function(input, output, session) {
   })
   createDemUpload <- reactive({
       if(input$elevation == "uploadDem"){
-          fileInput("demFile", "Upload DEM:", multiple=FALSE, accept=NULL)
+          fileInput("demFile", "Upload DEM:", multiple=TRUE, accept=NULL)
       }
   })
 

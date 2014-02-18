@@ -1,5 +1,7 @@
 library(leaflet)
 library(ShinyDash)
+library(shinyIncubator)
+library(shiny)
 #install_github('ShinyDash', 'trestletech')
 #install_github('leaflet-shiny', 'jcheng5')
 
@@ -59,7 +61,7 @@ shinyUI(bootstrapPage(
                      "Upload DEM" = "uploadDem", 
                      "Enter bounding box coordinates" = "boundingBox")),
 
-        htmlOutput("demUploader"),
+        div(style="width:220px", htmlOutput("demUploader")),
         
         div(style="display:inline-block", htmlOutput("nField")),
         div(style="display:inline-block", htmlOutput("sField")),
@@ -112,7 +114,9 @@ shinyUI(bootstrapPage(
                 ),
 
         checkboxInput("dirunalInput", "Use dirunal wind", FALSE),
+        helpText("(Not active)"),
         checkboxInput("stabilityInput", "Use non-neutral stability", FALSE),
+        helpText("(Not active)"),
         tags$br()
 
       ),
@@ -134,9 +138,19 @@ shinyUI(bootstrapPage(
       col(0.5, h5("Start run!")),
       col(2, actionButton('run_wn', img(src = "wn-icon.png", height = 40, width = 40))),
       
-      col(8, textOutput("runSubmittedMessage"), style = "color:blue"),
-      col(8, textOutput("runFinishedMessage"), style = "color:blue"),
-      col(4, htmlOutput('wn_progress'))
+      col(8, textOutput("runSubmittedMessage")),# style = "color:darkblue"),
+      #col(8, textOutput("runFinishedMessage"), style = "color:blue"),
+      col(4, htmlOutput('wnText')),# style = "color:darkblue"),
+      col(4, htmlOutput('convertToGoogleMapsText')),# style = "color:darkblue")
+      col(4, htmlOutput('downloadData'))
+      ),
+      
+      tags$br(),
+      
+      row(
+      col(8,
+          uiOutput('mymap')
+      )
       ),
       
       tags$hr(),
