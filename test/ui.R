@@ -73,9 +73,9 @@ shinyUI(bootstrapPage(
         tags$br(),
     
         selectInput("initializationMethod", "Simulation type:",
-                list("Domain average" = "domainAverageInitialization", 
-                     "Point initialization" = "pointInitialization",
-                     "Weather model" = "wxModelInitialization")),
+                list("Domain average" = "domainAverageInitialization")), 
+                     #"Point initialization" = "pointInitialization",
+                     #"Weather model" = "wxModelInitialization")),
         
         tags$br(),
         
@@ -133,7 +133,7 @@ shinyUI(bootstrapPage(
       ),
       
       tags$hr(),
-
+      
       row(
       col(0.5, h5("Start run!")),
       col(2, actionButton('run_wn', img(src = "wn-icon.png", height = 40, width = 40))),
@@ -142,13 +142,15 @@ shinyUI(bootstrapPage(
       #col(8, textOutput("runFinishedMessage"), style = "color:blue"),
       col(4, htmlOutput('wnText')),# style = "color:darkblue"),
       col(4, htmlOutput('convertToGoogleMapsText')),# style = "color:darkblue")
-      col(4, htmlOutput('downloadData'))
+      tags$br(),
+      col(8, htmlOutput('downloadButton'))
       ),
       
       tags$br(),
       
       row(
       col(8,
+          tags$br(),
           uiOutput('mymap')
       )
       ),

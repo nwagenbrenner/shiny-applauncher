@@ -58,6 +58,7 @@ shinyServer(function(input, output, session) {
          unlink("wind_vect.htm")
          unlink("Legend*")
          unlink("dem_*")
+         wnFinished <<- TRUE
          writeCfg()
          L<-system2("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", "windninja.cfg",
                     stdout=TRUE, stderr=TRUE)
@@ -65,6 +66,13 @@ shinyServer(function(input, output, session) {
       }
     })
     
+    output$wnText <- renderUI({
+      runWN()
+    })
+    
+    output$convertToGoogleMapsText <- renderUI({
+      convertToGoogleMaps() #writes the Google Maps File 
+    })
     
     createFinishedMessage <- reactive({
         if(input$run_wn == 1){
@@ -74,26 +82,27 @@ shinyServer(function(input, output, session) {
             }
         }
     })
-    
-    #createDownloadButton <- reactive({
-#        if(input$run_wn == 1){
-#            downloadButton('downloadData', label = "Download Output Files", class=NULL)
-#        }
-#    })
 
+#-----------------------------------------------------
+#   Download output file stuff
+#-----------------------------------------------------
 
-
-  output$wnText <- renderUI({
-      runWN()
+  createDownloadButton <- reactive({
+      if(input$run_wn == 1){
+          downloadButton('downloadData', 'Download Output Files')
+      }
   })
-  output$convertToGoogleMapsText <- renderUI({
-      convertToGoogleMaps() #writes the Google Maps File 
-  })
-#  output$downloadOuput <- downloadHandler({     
-
-#  })    
-       
-    
+  
+  output$downloadButton <- renderUI({
+      createDownloadButton()
+  }) 
+  
+  output$downloadData <- downloadHandler(
+         filename = function() { paste("windninja_output", '.tar', sep='') },
+         content = function(file) {
+           tar(file,".") 
+         }
+  )   
     #attempt to pipe unbuffered WN stdout to UI
 #    runWN2 <- reactive({
 #      if(input$run_wn == 1){
