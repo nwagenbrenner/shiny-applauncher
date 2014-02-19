@@ -3,10 +3,11 @@ library(leaflet)
 library(maps)
 library(raster)
 library(plotGoogleMaps)
-library(shinyIncubator)
+#library(shinyIncubator)
 
 #default max upload size is 5MB, increase to 30.
 options(shiny.maxRequestSize=30*1024^2)
+
 
 demFile <- NULL
 
@@ -58,9 +59,9 @@ shinyServer(function(input, output, session) {
          unlink("wind_vect.htm")
          unlink("Legend*")
          unlink("dem_*")
-         wnFinished <<- TRUE
+         #wnFinished <<- TRUE
          writeCfg()
-         L<-system2("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", "windninja.cfg",
+         L<-system2("WindNinja_cli", "windninja.cfg",
                     stdout=TRUE, stderr=TRUE)
          paste(L, sep="\n")
       }
@@ -138,6 +139,8 @@ shinyServer(function(input, output, session) {
       cat(paste("vegetation = ", input$vegetation, "\n", collapse=""), file="windninja.cfg", append=TRUE)
 
       if(input$elevation == "boundingBox"){
+          cat(paste("fetch_elevation = dem.tif\n"), file="windninja.cfg", append=TRUE)
+          cat(paste("elevation_source = us_srtm\n"), file="windninja.cfg", append=TRUE)
           cat(paste("north = ", input$northExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
           cat(paste("south = ", input$southExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
           cat(paste("east = ", input$eastExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
