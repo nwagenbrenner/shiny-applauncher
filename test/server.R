@@ -124,7 +124,7 @@ shinyServer(function(input, output, session) {
          unlink("Legend*")
          unlink("dem_*")
          writeCfg()
-         L<-system2("/home/natalie/windinja_trunk/build/src/cli/./WindNinja_cli", "windninja.cfg",
+         L<-system2("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", "windninja.cfg",
                     stdout=TRUE, stderr=TRUE)
          #L<-system2("WindNinja_cli", "windninja.cfg",
          #           stdout=TRUE, stderr=TRUE)
@@ -133,21 +133,26 @@ shinyServer(function(input, output, session) {
     })
     
      #attempt to pipe unbuffered WN stdout to UI
-#    runWN2 <- reactive({
+#    runWN <- reactive({
 #      if(input$run_wn == 1){
+#         unlink("windninja.cfg")
+#         unlink("wind_vect.htm")
+#         unlink("Legend*")
+#         unlink("dem_*")
 #         writeCfg()
 #         unlink ("wnpipe")
 #         system("mkfifo wnpipe")
 #         system(paste("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", 
-#                "/home/natalie/windninja_trunk/test_runs/bigbutte_domainAvg.cfg > wnpipe &",
-#                collapse=""))
-#         Sys.sleep (2)
+#                "windninja.cfg >> wnpipe &",
+#                collapse="")) 
+         #Sys.sleep (2)
 #         fileName="wnpipe"
 #         con=fifo(fileName,open="rt",blocking=TRUE)
 #         linn = " "
 #         while ( length(linn) > 0) {
 #           linn=scan(con,nlines=1,what="character", sep=" ", quiet=TRUE)
-#           cat(linn,"\n") #flush.console()
+#           cat(linn,"\n"); flush.console()
+           #print(paste(linn, collpase=""))
 #         }
 #         close(con)
 #         unlink ("wnpipe") 
@@ -156,10 +161,6 @@ shinyServer(function(input, output, session) {
     
     output$wnText <- renderUI({
       runWN()
-    })
-    
-    output$convertToGoogleMapsText <- renderUI({
-      convertToGoogleMaps() #writes the Google Maps File 
     })
     
 #-----------------------------------------------------
@@ -177,9 +178,9 @@ shinyServer(function(input, output, session) {
   }) 
   
   output$downloadData <- downloadHandler(
-         filename = function() { paste("windninja_output", '.tar', sep='') },
+         filename = function() { paste("windninja_output", '.tar.gz', sep='') },
          content = function(file) {
-           tar(file,".") 
+           tar(file,".", compression="gzip") 
          }
   )
 
@@ -211,10 +212,16 @@ shinyServer(function(input, output, session) {
           m=plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5),
                            mapTypeId='HYBRID',strokeWeight=2,openMap=FALSE)
                            
-          paste("Google Maps output written.")
+          
+          paste("")
+          #paste("Google Maps output written.")
       }
       #isolate})
   })
+  
+  output$convertToGoogleMapsText <- renderUI({
+      convertToGoogleMaps() #writes the Google Maps File 
+    })
 
   displayMap <- reactive({  
       if(input$run_wn==1 && input$outGoogleMaps == 1){
@@ -240,22 +247,22 @@ shinyServer(function(input, output, session) {
   })
   createNbox <- reactive({
       if(input$elevation == "boundingBox"){
-          textInputRow("northExtent", "North:", "42.8342")
+          textInputRow("northExtent", "North:", "46.8468")
       }
   })
   createSbox <- reactive({
       if(input$elevation == "boundingBox"){
-          textInputRow("southExtent", "South:", "42.8322")
+          textInputRow("southExtent", "South:", "46.7856")
       }
   })
   createEbox <- reactive({
       if(input$elevation == "boundingBox"){
-          textInputRow("eastExtent", "East:", "-113.0294")
+          textInputRow("eastExtent", "East:", "-116.7914")
       }
   })
   createWbox <- reactive({
       if(input$elevation == "boundingBox"){
-          textInputRow("westExtent", "West:", "-113.2423")
+          textInputRow("westExtent", "West:", "-116.9517")
       }
   })
   createDemUpload <- reactive({

@@ -5,10 +5,6 @@ library(shiny)
 #install_github('ShinyDash', 'trestletech')
 #install_github('leaflet-shiny', 'jcheng5')
 
-system("export WINDNINJA_DATA=/home/natalie/src/windninja/trunk/data/")
-
-#t<-read.table('date_time_zonespec.csv', header=TRUE, sep=",", stringsAsFactors=FALSE)
-
 row <- function(...) {
   tags$div(class="row", ...)
 }
