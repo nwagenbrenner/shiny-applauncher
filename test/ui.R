@@ -115,7 +115,7 @@ shinyUI(bootstrapPage(
         #        t$ID[65]
         #        ),
 
-        checkboxInput("dirunalInput", "Use dirunal wind", FALSE),
+        checkboxInput("diurnalInput", "Use diurnal wind", FALSE),
         helpText("(Not active)"),
         checkboxInput("stabilityInput", "Use non-neutral stability", FALSE),
         helpText("(Not active)"),

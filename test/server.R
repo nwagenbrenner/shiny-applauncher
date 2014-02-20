@@ -24,6 +24,7 @@ bindEvent <- function(eventExpr, callback, env=parent.frame(), quoted=FALSE) {
   }))
 }
 
+# Make smaller, side-by-side text boxes
 textInputRow<-function (inputId, label, value = "") 
 {
     div(
@@ -32,106 +33,16 @@ textInputRow<-function (inputId, label, value = "")
 }
 
 
-#----------------------------------------------------
+#==================================================================
 #     server logic
-#----------------------------------------------------
+#==================================================================
+
 shinyServer(function(input, output, session) {
-     
-    createSubmittedMessage <- reactive({
-        if(input$run_wn == 1){
-            paste("WindNinja run status:", collapse="")
-            
-        }
-        else{
-            paste("Click the run button and watch here for messages indicating that the run has completed and\n",
-                  "the Google Maps output file has been created (if requested). This will take several seconds.", collapse="")
-        }
-    })
-    
-    output$runSubmittedMessage <- renderText({
-      createSubmittedMessage()
-  })
-    
-    runWN <- reactive({
-      if(input$run_wn == 1){
-         unlink("windninja.cfg")
-         unlink("wind_vect.htm")
-         unlink("Legend*")
-         unlink("dem_*")
-         #wnFinished <<- TRUE
-         writeCfg()
-         L<-system2("WindNinja_cli", "windninja.cfg",
-                    stdout=TRUE, stderr=TRUE)
-         paste(L, sep="\n")
-      }
-    })
-    
-    output$wnText <- renderUI({
-      runWN()
-    })
-    
-    output$convertToGoogleMapsText <- renderUI({
-      convertToGoogleMaps() #writes the Google Maps File 
-    })
-    
-    createFinishedMessage <- reactive({
-        if(input$run_wn == 1){
-            paste("WindNinja simulation complete!", collapse="")
-            if(input$outGoogleMaps == TRUE){
-                paste("Wrting Google Maps output file...", collapse="")
-            }
-        }
-    })
 
 #-----------------------------------------------------
-#   Download output file stuff
-#-----------------------------------------------------
+#    write the cfg
+#-----------------------------------------------------   
 
-  createDownloadButton <- reactive({
-      if(input$run_wn == 1){
-          downloadButton('downloadData', 'Download Output Files')
-      }
-  })
-  
-  output$downloadButton <- renderUI({
-      createDownloadButton()
-  }) 
-  
-  output$downloadData <- downloadHandler(
-         filename = function() { paste("windninja_output", '.tar', sep='') },
-         content = function(file) {
-           tar(file,".") 
-         }
-  )   
-    #attempt to pipe unbuffered WN stdout to UI
-#    runWN2 <- reactive({
-#      if(input$run_wn == 1){
-#         writeCfg()
-#         unlink ("wnpipe")
-#         system("mkfifo wnpipe")
-#         system(paste("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", 
-#                "/home/natalie/windninja_trunk/test_runs/bigbutte_domainAvg.cfg > wnpipe &",
-#                collapse=""))
-#         Sys.sleep (2)
-#         fileName="wnpipe"
-#         con=fifo(fileName,open="rt",blocking=TRUE)
-#         linn = " "
-#         while ( length(linn) > 0) {
-#           linn=scan(con,nlines=1,what="character", sep=" ", quiet=TRUE)
-#           cat(linn,"\n") #flush.console()
-#         }
-#         close(con)
-#         unlink ("wnpipe") 
-#       }
-#    })
-  
-  createTestMessage <- reactive({
-      paste("input$demFile$datapath = ", input$demFile$datapath, collapse = "")
-  })
-  output$testMessage <- renderUI({
-      createTestMessage()
-  })
-      
   writeCfg <- reactive({
   isolate({
       cat("num_threads = 2\n",file="windninja.cfg")
@@ -186,10 +97,96 @@ shinyServer(function(input, output, session) {
       }
       })
   })
+     
+#-----------------------------------------------------
+#   Start a WindNinja run
+#-----------------------------------------------------
 
-#-----------------------------------------------
-# convert ascii grids to Google Maps format
-#-----------------------------------------------
+    createSubmittedMessage <- reactive({
+        if(input$run_wn == 1){
+            paste("WindNinja run status:", collapse="")
+            
+        }
+        else{
+            paste("Click the run button and watch here for messages indicating that the run has completed and\n",
+                  "the Google Maps output file has been created (if requested). This will take several seconds.", collapse="")
+        }
+    })
+    
+    output$runSubmittedMessage <- renderText({
+      createSubmittedMessage()
+  })
+    
+    runWN <- reactive({
+      if(input$run_wn == 1){
+         unlink("windninja.cfg")
+         unlink("wind_vect.htm")
+         unlink("Legend*")
+         unlink("dem_*")
+         writeCfg()
+         L<-system2("/home/natalie/windinja_trunk/build/src/cli/./WindNinja_cli", "windninja.cfg",
+                    stdout=TRUE, stderr=TRUE)
+         #L<-system2("WindNinja_cli", "windninja.cfg",
+         #           stdout=TRUE, stderr=TRUE)
+         paste(L, sep="\n")
+      }
+    })
+    
+     #attempt to pipe unbuffered WN stdout to UI
+#    runWN2 <- reactive({
+#      if(input$run_wn == 1){
+#         writeCfg()
+#         unlink ("wnpipe")
+#         system("mkfifo wnpipe")
+#         system(paste("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", 
+#                "/home/natalie/windninja_trunk/test_runs/bigbutte_domainAvg.cfg > wnpipe &",
+#                collapse=""))
+#         Sys.sleep (2)
+#         fileName="wnpipe"
+#         con=fifo(fileName,open="rt",blocking=TRUE)
+#         linn = " "
+#         while ( length(linn) > 0) {
+#           linn=scan(con,nlines=1,what="character", sep=" ", quiet=TRUE)
+#           cat(linn,"\n") #flush.console()
+#         }
+#         close(con)
+#         unlink ("wnpipe") 
+#       }
+#    })
+    
+    output$wnText <- renderUI({
+      runWN()
+    })
+    
+    output$convertToGoogleMapsText <- renderUI({
+      convertToGoogleMaps() #writes the Google Maps File 
+    })
+    
+#-----------------------------------------------------
+#   Download outputs
+#-----------------------------------------------------
+
+  createDownloadButton <- reactive({
+      if(input$run_wn == 1){
+          downloadButton('downloadData', 'Download Output Files')
+      }
+  })
+  
+  output$downloadButton <- renderUI({
+      createDownloadButton()
+  }) 
+  
+  output$downloadData <- downloadHandler(
+         filename = function() { paste("windninja_output", '.tar', sep='') },
+         content = function(file) {
+           tar(file,".") 
+         }
+  )
+
+
+#---------------------------------------------------------
+# convert ascii grids to Google Maps format and display
+#---------------------------------------------------------
   convertToGoogleMaps <- reactive({  
       #isolate({
       if(input$run_wn==1 && input$outGoogleMaps == 1){
@@ -356,6 +353,9 @@ shinyServer(function(input, output, session) {
       createUnitsOutputHeightButtons()
   })
   
+#----------------------------------------------------------------------
+#  Use map to choose DEM
+#----------------------------------------------------------------------
 
   # Create reactive values object to store our markers, so we can show 
   # their values in a table.
@@ -379,5 +379,19 @@ shinyServer(function(input, output, session) {
     map$clearMarkers()
     values$markers <- NULL
   })
+
+#==============================================================================
+#         TESTING
+#============================================================================== 
+  
+    createTestMessage <- reactive({
+      paste("input$demFile$datapath = ", input$demFile$datapath, collapse = "")
+  })
+  output$testMessage <- renderUI({
+      createTestMessage()
+  })
+  
+  
+  
 })  
 
