@@ -133,8 +133,9 @@ shinyUI(bootstrapPage(
       tags$hr(),
       
       row(
-      col(0.5, h5("Start run!")),
-      col(2, actionButton('run_wn', img(src = "wn-icon.png", height = 40, width = 40))),
+      col(0.5, htmlOutput('runButtonText')),
+      col(2, htmlOutput('runButton')),
+      #col(2, actionButton('run_wn', img(src = "wn-icon.png", height = 40, width = 40))),
       
       col(8, textOutput("runSubmittedMessage")),# style = "color:darkblue"),
       #col(8, textOutput("runFinishedMessage"), style = "color:blue"),
