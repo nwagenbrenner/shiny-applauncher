@@ -8,7 +8,6 @@ library(plotGoogleMaps)
 #default max upload size is 5MB, increase to 30.
 options(shiny.maxRequestSize=30*1024^2)
 
-
 demFile <- NULL
 
 # From a future version of Shiny
@@ -159,7 +158,7 @@ shinyServer(function(input, output, session) {
           demFile = "dem.asc"
           cat("elevation_file = dem.asc\n", file="windninja.cfg", append=TRUE)
       }
-      cat(paste("time_zone = ", input$timeZone, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+      cat(paste("time_zone = auto-detect\n", collapse=""), file="windninja.cfg", append=TRUE)
       cat(paste("initialization_method = ", input$initializationMethod, "\n", collapse=""), file="windninja.cfg", append=TRUE)
 
       if(input$initializationMethod == "domainAverageInitialization"){

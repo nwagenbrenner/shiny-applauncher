@@ -1,11 +1,13 @@
 library(leaflet)
 library(ShinyDash)
-library(shinyIncubator)
+#library(shinyIncubator)
 library(shiny)
 #install_github('ShinyDash', 'trestletech')
 #install_github('leaflet-shiny', 'jcheng5')
 
-t<-read.table('date_time_zonespec.csv', header=TRUE, sep=",", stringsAsFactors=FALSE)
+system("export WINDNINJA_DATA=/home/natalie/src/windninja/trunk/data/")
+
+#t<-read.table('date_time_zonespec.csv', header=TRUE, sep=",", stringsAsFactors=FALSE)
 
 row <- function(...) {
   tags$div(class="row", ...)
@@ -108,10 +110,10 @@ shinyUI(bootstrapPage(
      
       col(3,
         h4('2. Additional options'),
-        selectInput("timeZone", "Time zone:",
-                c(t$ID[1:length(t$ID)]),
-                t$ID[65]
-                ),
+        #selectInput("timeZone", "Time zone:",
+        #        c(t$ID[1:length(t$ID)]),
+        #        t$ID[65]
+        #        ),
 
         checkboxInput("dirunalInput", "Use dirunal wind", FALSE),
         helpText("(Not active)"),
