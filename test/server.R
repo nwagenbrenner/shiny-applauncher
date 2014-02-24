@@ -173,8 +173,8 @@ shinyServer(function(input, output, session) {
         if(length(input$run_wn) > 0){ 
             if(input$run_wn == 1){
                 unlink("windninja.cfg")
-                unlink("wind_vect.htm")
-                unlink("Legend*")
+                unlink("www/wind_vect.htm")
+                unlink("www/Legend*")
                 unlink("dem_*")
                 writeCfg()
                 L<-system2("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", "windninja.cfg",
@@ -270,6 +270,8 @@ shinyServer(function(input, output, session) {
                            mapTypeId='HYBRID',strokeWeight=2,openMap=FALSE)
                            
           
+              system("mv wind_vect.htm Legend* www/")
+              
               paste("")
               #paste("Google Maps output written.")
           }
@@ -288,7 +290,7 @@ shinyServer(function(input, output, session) {
       if(length(input$run_wn) > 0){   
           if(input$run_wn==1 && input$outGoogleMaps == 1){
               tags$iframe(
-                  srcdoc = paste(readLines('wind_vect.htm'), collapse = '\n'),
+                  srcdoc = paste(readLines('www/wind_vect.htm'), collapse = '\n'),
                   width = "100%",
                   height = "600px"
               )
