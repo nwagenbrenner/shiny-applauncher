@@ -112,10 +112,29 @@ shinyUI(bootstrapPage(
         #        ),
 
         checkboxInput("diurnalInput", "Use diurnal wind", FALSE),
-        helpText("(Not active)"),
         checkboxInput("stabilityInput", "Use non-neutral stability", FALSE),
-        helpText("(Not active)"),
+        
+        tags$br(),
+        
+        div(style="display:inline-block", htmlOutput("yearField")),
+        div(style="display:inline-block", htmlOutput("monthField")),
+        tags$br(),
+        div(style="display:inline-block", htmlOutput("dayField")),
+        div(style="display:inline-block", htmlOutput("hourField")),
+        div(style="display:inline-block", htmlOutput("minuteField")),
+        
+        tags$br(),
+        
+        div(style="display:inline-block", htmlOutput("inputAirTempField")),
+        div(class="input-mini",style="display:inline-block",htmlOutput("unitsInputAirTempField")),
+        
+        tags$br(),
+
+        div(style="display:inline-block", htmlOutput("inputCloudCoverField")),
+        div(class="input-mini",style="display:inline-block; width: 20px;",htmlOutput("unitsInputCloudCoverField")),
+        
         tags$br()
+        
 
       ),
       col(3,

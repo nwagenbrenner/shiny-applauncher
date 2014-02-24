@@ -109,7 +109,24 @@ shinyServer(function(input, output, session) {
           cat(paste("input_speed_units = ", input$unitsInputSpeed, "\n", collapse=""), file="windninja.cfg", append=TRUE)
           cat(paste("input_direction = ", input$inputDirection, "\n", collapse=""), file="windninja.cfg", append=TRUE)
       }
-
+      if(input$diurnalInput == TRUE){
+          cat("diurnal_winds = true\n", file="windninja.cfg", append=TRUE)
+      }
+      if(input$stabilityInput == TRUE){
+          cat("non_neutral_stability = true\n", file="windninja.cfg", append=TRUE)
+          
+      }
+      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
+          cat(paste("uni_air_temp = ", input$inputAirTemp, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+          cat(paste("air_temp_units = ", input$unitsInputAirTemp, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+          cat(paste("uni_cloud_cover = ", input$inputCloudCover, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+          cat(paste("cloud_cover_units = ", input$unitsInputCloudCover, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+          cat(paste("year = ", input$year, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+          cat(paste("month = ", input$month, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+          cat(paste("day = ", input$day, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+          cat(paste("hour = ", input$hour, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+          cat(paste("minute = ", input$minute, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+      }
       cat(paste("output_wind_height = ", input$outputWindHeight, "\n", collapse=""), file="windninja.cfg", append=TRUE)
       cat(paste("units_output_wind_height = ", input$unitsOutputWindHeight, "\n", collapse=""), file="windninja.cfg", append=TRUE)
       cat(paste("mesh_choice = ", input$meshChoice, "\n", collapse=""), file="windninja.cfg", append=TRUE)
@@ -345,7 +362,7 @@ shinyServer(function(input, output, session) {
 #-------------------------------------------------------------
   createHeightBox <- reactive({
       if(input$initializationMethod == "domainAverageInitialization"){
-          textInputRow("inputWindHeight", "Input height", "10.0")
+          textInputRow("inputWindHeight", "Input height:", "10.0")
       }
   })
   createUnitsHeightButtons <- reactive({
@@ -358,7 +375,7 @@ shinyServer(function(input, output, session) {
   })
   createInputSpeedBox <- reactive({
       if(input$initializationMethod == "domainAverageInitialization"){
-          textInputRow("inputSpeed", "Wind speed", "0.0")
+          textInputRow("inputSpeed", "Wind speed:", "0.0")
       }
   })
   createUnitsSpeedButtons <- reactive({
@@ -371,7 +388,7 @@ shinyServer(function(input, output, session) {
   })
   createDirectionBox <- reactive({
       if(input$initializationMethod == "domainAverageInitialization"){
-          textInputRow("inputDirection", "Wind direction", "0")
+          textInputRow("inputDirection", "Wind direction:", "0")
       }
   })
   createOutputHeightBox <- reactive({
@@ -405,7 +422,100 @@ shinyServer(function(input, output, session) {
   output$unitsOutputHeightField <- renderUI({
       createUnitsOutputHeightButtons()
   })
+
+#-------------------------------------------------------------
+#   create input option boxes for diurnal and stability
+#-------------------------------------------------------------
+  createSpace <- reactive({
+      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
+          tags$br()
+      }
+  })
+  createYearbox <- reactive({
+      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
+          textInputRow("year", "Year:", "2014")
+      }
+  })
+  createMonthbox <- reactive({
+      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
+          textInputRow("month", "Month:", "06")
+      }
+  })
+  createDaybox <- reactive({
+      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
+          textInputRow("day", "Day:", "13")
+      }
+  })
+  createHourbox <- reactive({
+      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
+          textInputRow("hour", "Hour:", "15")
+      }
+  })
+  createMinutebox <- reactive({
+      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
+          textInputRow("minute", "Minute:", "30")
+      }
+  })
+
+  output$addExtraSpace <- renderUI({
+      createSpace()
+  })
+  output$yearField <- renderUI({
+      createYearbox()
+  })
+  output$monthField <- renderUI({
+      createMonthbox()
+  })
+  output$dayField <- renderUI({
+      createDaybox()
+  })
+  output$hourField <- renderUI({
+      createHourbox()
+  })
+  output$minuteField <- renderUI({
+      createMinutebox()
+  })
   
+  createInputAirTempBox <- reactive({
+      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
+          textInputRow("inputAirTemp", "Air temperature:", "72.0")
+      }
+  })
+  createUnitsAirTempButtons <- reactive({
+      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
+          #radioButtons("unitsInputAirTemp", "Units", c("F" = "F", "C" = "C"))
+          selectInput("unitsInputAirTemp", "Units:",
+                list("F" = "F", 
+                     "C" = "C"))
+      }
+  })
+  createInputCloudCoverBox <- reactive({
+      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
+          textInputRow("inputCloudCover", "Cloud cover:", "50")
+      }
+  })
+  createUnitsCloudCoverButtons <- reactive({
+      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
+          #radioButtons("unitsInputCloudCover", "Units", c("percent" = "percent", "fraction" = "fraction"))
+          selectInput("unitsInputCloudCover", "Units:",
+                list("percent" = "percent", 
+                     "fraction" = "fraction"))
+      }
+  })
+
+  output$inputAirTempField <- renderUI({
+      createInputAirTempBox()
+  })
+  output$unitsInputAirTempField <- renderUI({
+      createUnitsAirTempButtons()
+  })
+  output$inputCloudCoverField <- renderUI({
+      createInputCloudCoverBox()
+  })
+  output$unitsInputCloudCoverField <- renderUI({
+      createUnitsCloudCoverButtons()
+  })
+
 #----------------------------------------------------------------------
 #  Use map to choose DEM
 #----------------------------------------------------------------------
