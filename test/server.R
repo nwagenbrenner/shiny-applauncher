@@ -289,7 +289,9 @@ shinyServer(function(input, output, session) {
 
   displayMap <- reactive({
       if(length(input$run_wn) > 0){   
-          if(input$run_wn==1 && input$outGoogleMaps == 1){
+          if(input$run_wn==1 && 
+             input$outGoogleMaps == 1 && 
+             "wind_vect.htm" %in% dir("www")){
               tags$iframe(
                   srcdoc = paste(readLines('www/wind_vect.htm'), collapse = '\n'),
                   width = "100%",
