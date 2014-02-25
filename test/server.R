@@ -111,14 +111,14 @@ shinyServer(function(input, output, session) {
       }
       if(input$diurnalInput == TRUE){
           cat("diurnal_winds = true\n", file="windninja.cfg", append=TRUE)
+          cat(paste("uni_air_temp = ", input$inputAirTemp, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+          cat(paste("air_temp_units = ", input$unitsInputAirTemp, "\n", collapse=""), file="windninja.cfg", append=TRUE)
       }
       if(input$stabilityInput == TRUE){
           cat("non_neutral_stability = true\n", file="windninja.cfg", append=TRUE)
           
       }
       if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
-          cat(paste("uni_air_temp = ", input$inputAirTemp, "\n", collapse=""), file="windninja.cfg", append=TRUE)
-          cat(paste("air_temp_units = ", input$unitsInputAirTemp, "\n", collapse=""), file="windninja.cfg", append=TRUE)
           cat(paste("uni_cloud_cover = ", input$inputCloudCover, "\n", collapse=""), file="windninja.cfg", append=TRUE)
           cat(paste("cloud_cover_units = ", input$unitsInputCloudCover, "\n", collapse=""), file="windninja.cfg", append=TRUE)
           cat(paste("year = ", input$year, "\n", collapse=""), file="windninja.cfg", append=TRUE)
@@ -267,7 +267,8 @@ shinyServer(function(input, output, session) {
 
               pal<-colorRampPalette(c("blue","green","yellow", "orange", "red"))
               m=plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5),
-                           mapTypeId='HYBRID',strokeWeight=2,openMap=FALSE)
+                           mapTypeId='HYBRID',strokeWeight=2,
+                           clickable=FALSE,openMap=FALSE)
                            
           
               system("mv wind_vect.htm Legend* www/")
@@ -479,12 +480,12 @@ shinyServer(function(input, output, session) {
   })
   
   createInputAirTempBox <- reactive({
-      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
+      if(input$diurnalInput == TRUE){
           textInputRow("inputAirTemp", "Air temperature:", "72.0")
       }
   })
   createUnitsAirTempButtons <- reactive({
-      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
+      if(input$diurnalInput == TRUE){
           #radioButtons("unitsInputAirTemp", "Units", c("F" = "F", "C" = "C"))
           selectInput("unitsInputAirTemp", "Units:",
                 list("F" = "F", 

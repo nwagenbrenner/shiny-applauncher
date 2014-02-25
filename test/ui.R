@@ -104,7 +104,7 @@ shinyUI(bootstrapPage(
         div(style = "display:inline-block; width: 20%;",htmlOutput("unitsOutputHeightField"))
       ),
      
-      col(3,
+      col(4,
         h4('2. Additional options'),
         #selectInput("timeZone", "Time zone:",
         #        c(t$ID[1:length(t$ID)]),
@@ -118,11 +118,12 @@ shinyUI(bootstrapPage(
         
         div(style="display:inline-block", htmlOutput("yearField")),
         div(style="display:inline-block", htmlOutput("monthField")),
-        tags$br(),
+        #tags$br(),
         div(style="display:inline-block", htmlOutput("dayField")),
         div(style="display:inline-block", htmlOutput("hourField")),
         div(style="display:inline-block", htmlOutput("minuteField")),
         
+        tags$br(),
         tags$br(),
         
         div(style="display:inline-block", htmlOutput("inputAirTempField")),
@@ -137,7 +138,7 @@ shinyUI(bootstrapPage(
         
 
       ),
-      col(3,
+      col(4,
         h4('3. Output'),
         h5("Choose output format(s):"),
         checkboxInput("outGoogleMaps", "Google Maps", TRUE),
