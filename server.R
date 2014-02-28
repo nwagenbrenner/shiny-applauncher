@@ -1,10 +1,18 @@
 library(shiny)
 
+uuid <- ""
 
 shinyServer(function(input, output, session) {
 #-----------------------------------------------------
 #    Request user info and set up a project dir 
 #-----------------------------------------------------
+  
+  makeNinja<-function(){
+      system(paste0("cp serverWindNinja.R ../ ", uuid, "/server.R"))
+      system(paste0("cp uiWindNinja.R ../", uuid, "/ui.R"))
+      system(paste0("cp -r www/ ../", uuid))
+      system(paste0("cp ascii2vectorsSP.R ../", uuid))
+  }
   
   generateEmail <- reactive({
           if(input$email == " " && input$project == " "){
@@ -17,17 +25,20 @@ shinyServer(function(input, output, session) {
               return(h4("Enter project name."))
           }
           else{
-              uuid<-system2("uuidgen", "-r", stdout=TRUE)
-              system(paste("mkdir", uuid, sep=" "))
-              system(paste0("cp serverWindNinja.R ", uuid, "/server.R"))
-              system(paste0("cp uiWindNinja.R ", uuid, "/ui.R"))
-              system(paste0("cp -r www/ ", uuid))
-              system(paste0("cp ascii2vectorsSP.R ", uuid))
+              uuid<<-system2("uuidgen", "-r", stdout=TRUE)
+              system(paste("mkdir ../", uuid, sep=" "))
               
-              
-              system2("./mailMessage.bash", c(input$email, uuid))
-              
-              h4("Project created! An email has been sent with the link to your project page.")
+              if(input$shinyApp == "windninja"){
+                  makeNinja()
+                  system2("./mailMessage.bash", c(input$email, uuid, input$shinyApp))
+                  h4("WindNinja project created! An email has been sent with the link to your project page.")
+              }
+              else if(input$shinyApp == "fvs"){
+                  h4("Try again, only WindNinja is currently available.")
+              }
+              else if(input$shinyApp == "hireswind"){
+                  h4("Try again, only WindNinja is currently available.")
+              }
           }
   })
   
