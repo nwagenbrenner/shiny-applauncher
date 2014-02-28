@@ -8,10 +8,10 @@ shinyServer(function(input, output, session) {
 #-----------------------------------------------------
   
   makeNinja<-function(){
-      system(paste0("cp serverWindNinja.R ../ ", uuid, "/server.R"))
-      system(paste0("cp uiWindNinja.R ../", uuid, "/ui.R"))
-      system(paste0("cp -r www/ ../", uuid))
-      system(paste0("cp ascii2vectorsSP.R ../", uuid))
+      system(paste0("cp serverWindNinja.R ../userWork/ ", uuid, "/server.R"))
+      system(paste0("cp uiWindNinja.R ../userWork", uuid, "/ui.R"))
+      system(paste0("cp -r www/ ../userWork", uuid))
+      system(paste0("cp ascii2vectorsSP.R ../userWork", uuid))
   }
   
   generateEmail <- reactive({
@@ -26,7 +26,7 @@ shinyServer(function(input, output, session) {
           }
           else{
               uuid<<-system2("uuidgen", "-r", stdout=TRUE)
-              system(paste("mkdir ../", uuid, sep=" "))
+              system(paste("mkdir ../userWork", uuid, sep=" "))
               
               if(input$shinyApp == "windninja"){
                   makeNinja()
