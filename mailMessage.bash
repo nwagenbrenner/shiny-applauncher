@@ -8,7 +8,7 @@ mailx -t $emailAddress \
 
 Your WindNinja project has been created. Access your project here:
 
-http://forest.moscowfsl.wsu.edu/climate/$ProjectDirectory
+http://forest.moscowfsl.wsu.edu:3838/shinyWindNinja/$ProjectDirectory
 
 !
 echo Message sent, emailAddress = $emailAddress, ProjectDirectory = $ProjectDirectory

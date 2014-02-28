@@ -25,7 +25,7 @@ shinyServer(function(input, output, session) {
               system(paste0("cp ascii2vectorsSP.R ", uuid))
               
               
-              system2("./mailMessage.bash", input$email, paste0("forest.moscowfsl.wsu.edu:3838/shinyWindNinja/", uuid))
+              system2("./mailMessage.bash", input$email, uuid))
               
               h4("Project created! An email has been sent with the link to your project page.")
           }
