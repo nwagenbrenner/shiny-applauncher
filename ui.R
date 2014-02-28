@@ -1,48 +1,55 @@
 library(shiny)
 
-# Define UI for high-res wind application
-shinyUI(pageWithSidebar(
+row <- function(...) {
+  tags$div(class="row", ...)
+}
 
-  # Application title
-  headerPanel("Online Test Interface for WindNinja"),
+col <- function(width, ...) {
+  tags$div(class=paste0("span", width), ...)
+}
 
-  sidebarPanel(
-    tabsetPanel(
-      tabPanel("Inputs",
-        selectInput("elevation", "Elevation input:",
-                list("Upload DEM" = "uploadDem", 
-                     "Select from map" = "swoopMap",
-                     "Enter bounding box coordinates" = "boundingBox")),
-        selectInput("vegetation", "Choose predominant vegetation type:",
-                list("Grass" = "grass", 
-                     "Shrubs" = "shrubs",
-                     "Trees" = "trees")),
+shinyUI(bootstrapPage(
+  tags$head(tags$link(rel='stylesheet', type='text/css', href='styles.css')),
+  tags$div(
+      class = "container",
+    row(
+      col(5, h2('WindNinja Project Creator'))
+    ),
     
-        selectInput("runType", "Choose simulation type:",
-                list("Domain average" = "domainAvg", 
-                     "Point initialization" = "pointInitialization",
-                     "Weather model" = "wxModel")),
+    tags$hr(),
     
-        htmlOutput("selectUI")),
+    row(
+      col(8, h5('Enter an email address and project name to create your project space.'))
+    ),
     
-      tabPanel("Additional Options", h4("Additional options (to be added later).")),
-      tabPanel("Outputs",
-        downloadButton('downloadData', 'Download output file')
+    tags$br(),
+
+    row(
+      col(4,
+         textInput("email", "Email:", " ")
+      )
+    ),
+    row(
+      col(4,
+         textInput("project", "Project:", " ")
+      )
+    ),
+    
+    tags$br(),
+    
+    row(
+      col(8,
+        actionButton('createProject', "Create Project")
+      )
+    ),
+    
+    tags$br(),
+    
+    row(
+      col(8,
+        htmlOutput("projectText")# style = "color:darkblue"),
       )
     )
-  ),
-
-  # Show the caption and plot of the requested variable against speed
-  mainPanel(
-    tabsetPanel(
-      tabPanel("Inputs", h3("Map for selecting/viewing DEM bounds (coming soon).")), 
-      tabPanel("Outputs", h4("Select and view ouptut fields here."))
-    )
-        
-    #h3(textOutput("caption"))
-    
-    )
-    
-  ))
-
-
+      
+  )
+))

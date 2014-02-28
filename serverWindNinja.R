@@ -38,7 +38,12 @@ textInputRow<-function (inputId, label, value = "")
 #==================================================================
 
 shinyServer(function(input, output, session) {
-
+#-----------------------------------------------------
+#    set up directory for output based on uuid 
+#-----------------------------------------------------
+  uuid<-system2("uuidgen", "-r", stdout=TRUE)
+  system(paste("mkdir", uuid, sep=" "))
+  
 #-----------------------------------------------------
 #    Add run button 
 #----------------------------------------------------- 
@@ -75,72 +80,73 @@ shinyServer(function(input, output, session) {
 
   writeCfg <- reactive({
   isolate({
-      cat("num_threads = 2\n",file="windninja.cfg")
-      cat(paste("vegetation = ", input$vegetation, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+      cfg<-paste0(uuid, "/windninja.cfg")
+      cat("num_threads = 2\n",file=cfg)
+      cat(paste("vegetation = ", input$vegetation, "\n", collapse=""), file=cfg, append=TRUE)
 
       if(input$elevation == "boundingBox"){
-          cat(paste("fetch_elevation = dem.tif\n"), file="windninja.cfg", append=TRUE)
-          cat(paste("elevation_source = us_srtm\n"), file="windninja.cfg", append=TRUE)
-          cat(paste("north = ", input$northExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
-          cat(paste("south = ", input$southExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
-          cat(paste("east = ", input$eastExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
-          cat(paste("west = ", input$westExtent, "\n", collapse=""),file="windninja.cfg", append=TRUE)
+          cat(paste("fetch_elevation = dem.tif\n"), file=cfg, append=TRUE)
+          cat(paste("elevation_source = us_srtm\n"), file=cfg, append=TRUE)
+          cat(paste("north = ", input$northExtent, "\n", collapse=""),file=cfg, append=TRUE)
+          cat(paste("south = ", input$southExtent, "\n", collapse=""),file=cfg, append=TRUE)
+          cat(paste("east = ", input$eastExtent, "\n", collapse=""),file=cfg, append=TRUE)
+          cat(paste("west = ", input$westExtent, "\n", collapse=""),file=cfg, append=TRUE)
       }
 
       else if(input$elevation == "uploadDem"){
           #move the file to working dir and rename
           if(length(input$demFile$datapath) == 2){
-              system(paste("mv ",  input$demFile$datapath[1], " dem.asc"))
-              system(paste("mv ",  input$demFile$datapath[2], " dem.prj"))
+              system(paste("mv ",  input$demFile$datapath[1], paste0(uuid,"/dem.asc")))
+              system(paste("mv ",  input$demFile$datapath[2], paste0(uuid,"/dem.prj")))
           }
           else{
-              system(paste("mv ",  input$demFile$datapath, " dem.asc"))
+              system(paste("mv ",  input$demFile$datapath, paste0(uuid,"/dem.asc")))
           }
-          demFile = "dem.asc"
-          cat("elevation_file = dem.asc\n", file="windninja.cfg", append=TRUE)
+          demFile = paste0(uuid,"/dem.asc")
+          cat(paste("elevation_file = ", demFile, "\n"), file=cfg, append=TRUE)
       }
-      cat(paste("time_zone = auto-detect\n", collapse=""), file="windninja.cfg", append=TRUE)
-      cat(paste("initialization_method = ", input$initializationMethod, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+      cat(paste("time_zone = auto-detect\n", collapse=""), file=cfg, append=TRUE)
+      cat(paste("initialization_method = ", input$initializationMethod, "\n", collapse=""), file=cfg, append=TRUE)
 
       if(input$initializationMethod == "domainAverageInitialization"){
-          cat(paste("input_wind_height = ", input$inputWindHeight, "\n", collapse=""), file="windninja.cfg", append=TRUE)
-          cat(paste("units_input_wind_height = ", input$unitsInputWindHeight, "\n", collapse=""), file="windninja.cfg", append=TRUE)
-          cat(paste("input_speed = ", input$inputSpeed, "\n", collapse=""), file="windninja.cfg", append=TRUE)
-          cat(paste("input_speed_units = ", input$unitsInputSpeed, "\n", collapse=""), file="windninja.cfg", append=TRUE)
-          cat(paste("input_direction = ", input$inputDirection, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+          cat(paste("input_wind_height = ", input$inputWindHeight, "\n", collapse=""), file=cfg, append=TRUE)
+          cat(paste("units_input_wind_height = ", input$unitsInputWindHeight, "\n", collapse=""), file=cfg, append=TRUE)
+          cat(paste("input_speed = ", input$inputSpeed, "\n", collapse=""), file=cfg, append=TRUE)
+          cat(paste("input_speed_units = ", input$unitsInputSpeed, "\n", collapse=""), file=cfg, append=TRUE)
+          cat(paste("input_direction = ", input$inputDirection, "\n", collapse=""), file=cfg, append=TRUE)
       }
       if(input$diurnalInput == TRUE){
-          cat("diurnal_winds = true\n", file="windninja.cfg", append=TRUE)
-          cat(paste("uni_air_temp = ", input$inputAirTemp, "\n", collapse=""), file="windninja.cfg", append=TRUE)
-          cat(paste("air_temp_units = ", input$unitsInputAirTemp, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+          cat("diurnal_winds = true\n", file=cfg, append=TRUE)
+          cat(paste("uni_air_temp = ", input$inputAirTemp, "\n", collapse=""), file=cfg, append=TRUE)
+          cat(paste("air_temp_units = ", input$unitsInputAirTemp, "\n", collapse=""), file=cfg, append=TRUE)
       }
       if(input$stabilityInput == TRUE){
-          cat("non_neutral_stability = true\n", file="windninja.cfg", append=TRUE)
+          cat("non_neutral_stability = true\n", file=cfg, append=TRUE)
           
       }
       if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
-          cat(paste("uni_cloud_cover = ", input$inputCloudCover, "\n", collapse=""), file="windninja.cfg", append=TRUE)
-          cat(paste("cloud_cover_units = ", input$unitsInputCloudCover, "\n", collapse=""), file="windninja.cfg", append=TRUE)
-          cat(paste("year = ", input$year, "\n", collapse=""), file="windninja.cfg", append=TRUE)
-          cat(paste("month = ", input$month, "\n", collapse=""), file="windninja.cfg", append=TRUE)
-          cat(paste("day = ", input$day, "\n", collapse=""), file="windninja.cfg", append=TRUE)
-          cat(paste("hour = ", input$hour, "\n", collapse=""), file="windninja.cfg", append=TRUE)
-          cat(paste("minute = ", input$minute, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+          cat(paste("uni_cloud_cover = ", input$inputCloudCover, "\n", collapse=""), file=cfg, append=TRUE)
+          cat(paste("cloud_cover_units = ", input$unitsInputCloudCover, "\n", collapse=""), file=cfg, append=TRUE)
+          cat(paste("year = ", input$year, "\n", collapse=""), file=cfg, append=TRUE)
+          cat(paste("month = ", input$month, "\n", collapse=""), file=cfg, append=TRUE)
+          cat(paste("day = ", input$day, "\n", collapse=""), file=cfg, append=TRUE)
+          cat(paste("hour = ", input$hour, "\n", collapse=""), file=cfg, append=TRUE)
+          cat(paste("minute = ", input$minute, "\n", collapse=""), file=cfg, append=TRUE)
       }
-      cat(paste("output_wind_height = ", input$outputWindHeight, "\n", collapse=""), file="windninja.cfg", append=TRUE)
-      cat(paste("units_output_wind_height = ", input$unitsOutputWindHeight, "\n", collapse=""), file="windninja.cfg", append=TRUE)
-      cat(paste("mesh_choice = ", input$meshChoice, "\n", collapse=""), file="windninja.cfg", append=TRUE)
+      cat(paste("output_wind_height = ", input$outputWindHeight, "\n", collapse=""), file=cfg, append=TRUE)
+      cat(paste("units_output_wind_height = ", input$unitsOutputWindHeight, "\n", collapse=""), file=cfg, append=TRUE)
+      cat(paste("mesh_choice = ", input$meshChoice, "\n", collapse=""), file=cfg, append=TRUE)
       if(input$outFire == 1 || input$outGoogleMaps == 1){
-          cat("write_ascii_output = true\n", file="windninja.cfg", append=TRUE)
+          cat("write_ascii_output = true\n", file=cfg, append=TRUE)
       }
       if(input$outGoogleEarth == 1){
-          cat("write_goog_output = true\n", file="windninja.cfg", append=TRUE)
+          cat("write_goog_output = true\n", file=cfg, append=TRUE)
       }
       if(input$outShape == 1){
-          cat("write_shapefile_output = true\n", file="windninja.cfg", append=TRUE)
+          cat("write_shapefile_output = true\n", file=cfg, append=TRUE)
       }
       if(input$outVtk == 1){
-          cat("write_vtk_output = true\n", file="windninja.cfg", append=TRUE)
+          cat("write_vtk_output = true\n", file=cfg, append=TRUE)
       }
       })
   })
@@ -169,52 +175,53 @@ shinyServer(function(input, output, session) {
       createSubmittedMessage()
   })
     
-    runWN <- reactive({
-        if(length(input$run_wn) > 0){ 
-            if(input$run_wn == 1){
-                unlink("windninja.cfg")
-                unlink("www/wind_vect.htm")
-                unlink("www/Legend*")
-                unlink("dem_*")
-                writeCfg()
-                L<-system2("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", "windninja.cfg",
-                           stdout=TRUE, stderr=TRUE)
+#    runWN <- reactive({
+#        if(length(input$run_wn) > 0){ 
+#            if(input$run_wn == 1){
+#                unlink("windninja.cfg")
+#                unlink("www/wind_vect.htm")
+#                unlink("www/Legend*")
+#                unlink("dem_*")
+#                writeCfg()               
+#                L<-system2("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", "windninja.cfg",
+#                           stdout="wnout", stderr=TRUE)
                 #L<-system2("WindNinja_cli", "windninja.cfg",
                 #           stdout=TRUE, stderr=TRUE)
-                paste(L, sep="\n")
-            }
-        }
-    })
-    
-     #attempt to pipe unbuffered WN stdout to UI
-#    runWN <- reactive({
-#      if(input$run_wn == 1){
-#         unlink("windninja.cfg")
-#         unlink("wind_vect.htm")
-#         unlink("Legend*")
-#         unlink("dem_*")
-#         writeCfg()
-#         unlink ("wnpipe")
-#         system("mkfifo wnpipe")
-#         system(paste("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", 
-#                "windninja.cfg >> wnpipe &",
-#                collapse="")) 
-         #Sys.sleep (2)
-#         fileName="wnpipe"
-#         con=fifo(fileName,open="rt",blocking=TRUE)
-#         linn = " "
-#         while ( length(linn) > 0) {
-#           linn=scan(con,nlines=1,what="character", sep=" ", quiet=TRUE)
-#           cat(linn,"\n"); flush.console()
-           #print(paste(linn, collpase=""))
-#         }
-#         close(con)
-#         unlink ("wnpipe") 
-#       }
+#                paste(L, sep="\n")
+#            }
+#        }
 #    })
     
-    output$wnText <- renderUI({
-      runWN()
+     #attempt to pipe unbuffered WN stdout to UI
+    runWN <- reactive({
+      if(length(input$run_wn) > 0 && input$run_wn == 1){
+         #unlink("windninja.cfg")
+         #unlink("www/wind_vect.htm")
+         #unlink("www/Legend*")
+         #unlink("dem_*")
+         writeCfg()
+         unlink ("wnpipe")
+         system("mkfifo wnpipe")
+         system(paste("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", 
+                paste0(uuid,"/windninja.cfg"), ">> wnpipe",
+                collapse=""), intern=FALSE, wait=FALSE)
+                
+         
+         fileName="wnpipe"
+         con=fifo(fileName,open="rt",blocking=TRUE)
+         linn = " "
+         while ( length(linn) > 0) {
+           linn=scan(con,nlines=1,what="character", sep=" ", quiet=TRUE)
+           cat(linn,"\n"); flush.console()
+         }
+         close(con)
+         unlink ("wnpipe")
+         
+       }
+    })
+
+    output$wnText <- renderPrint({
+         runWN()   
     })
     
 #-----------------------------------------------------
@@ -222,10 +229,10 @@ shinyServer(function(input, output, session) {
 #-----------------------------------------------------
 
   createDownloadButton <- reactive({
-      if(length(input$run_wn) > 0){ 
-          if(input$run_wn == 1){
-              downloadButton('downloadData', 'Download Output Files')
-          }
+      if(length(input$run_wn) > 0 && 
+          input$run_wn == 1){ 
+
+          downloadButton('downloadData', 'Download Output Files')
       }
   })
   
@@ -236,7 +243,7 @@ shinyServer(function(input, output, session) {
   output$downloadData <- downloadHandler(
          filename = function() { paste("windninja_output", '.tar.gz', sep='') },
          content = function(file) {
-           tar(file,".", compression="gzip") 
+           tar(file,uuid, compression="gzip") 
          }
   )
 
@@ -249,10 +256,10 @@ shinyServer(function(input, output, session) {
       if(length(input$run_wn) > 0){ 
           if(input$run_wn==1 && input$outGoogleMaps == 1){
           
-              spdFiles<-system("ls -t | grep vel.asc", intern = TRUE)
+              spdFiles<-paste0(uuid,"/",system(paste("ls -t", uuid, "| grep vel.asc", sep=" "), intern = TRUE))
               spd<-raster(spdFiles[1]) # get the most recent one
           
-              angFiles<-system("ls -t | grep ang.asc", intern = TRUE)
+              angFiles<-paste0(uuid,"/",system(paste("ls -t", uuid, "| grep ang.asc", sep=" "), intern = TRUE))
               ang<-raster(angFiles[1]) # get the most recent one
 
               vectors<-brick(spd, ang)
@@ -271,7 +278,8 @@ shinyServer(function(input, output, session) {
                            clickable=FALSE,openMap=FALSE)
                            
           
-              system("mv wind_vect.htm Legend* www/")
+              system(paste("mv wind_vect.htm", uuid, sep=" "))
+              system("mv Legend* www/")
               
               paste("")
               #paste("Google Maps output written.")
@@ -291,9 +299,9 @@ shinyServer(function(input, output, session) {
       if(length(input$run_wn) > 0){   
           if(input$run_wn==1 && 
              input$outGoogleMaps == 1 && 
-             "wind_vect.htm" %in% dir("www")){
+             "wind_vect.htm" %in% dir(uuid)){
               tags$iframe(
-                  srcdoc = paste(readLines('www/wind_vect.htm'), collapse = '\n'),
+                  srcdoc = paste(readLines(paste0(uuid,'/wind_vect.htm')), collapse = '\n'),
                   width = "100%",
                   height = "600px"
               )

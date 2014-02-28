@@ -159,7 +159,7 @@ shinyUI(bootstrapPage(
       
       col(8, textOutput("runSubmittedMessage")),# style = "color:darkblue"),
       #col(8, textOutput("runFinishedMessage"), style = "color:blue"),
-      col(4, htmlOutput('wnText')),# style = "color:darkblue"),
+      col(4, htmlOutput('wnText'), style = "color:darkblue"),
       col(4, htmlOutput('convertToGoogleMapsText')),# style = "color:darkblue")
       tags$br(),
       col(8, htmlOutput('downloadButton'))

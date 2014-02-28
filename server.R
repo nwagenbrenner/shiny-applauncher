@@ -1,14 +1,45 @@
 library(shiny)
 
-#set some initial data
 
-# Define server logic
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
+#-----------------------------------------------------
+#    Request user info and set up a project dir 
+#-----------------------------------------------------
   
-  # Compute the forumla text in a reactive expression
-
-  # Return the formula text for printing as a caption
-
-
-})
+  generateEmail <- reactive({
+          if(input$email == " " && input$project == " "){
+              return(h4("Enter valid email address and project name."))
+          }
+          if(input$email == " "){
+              return(h4("Enter valid email address."))
+          }
+          if(input$project == " "){
+              return(h4("Enter project name."))
+          }
+          else{
+              uuid<-system2("uuidgen", "-r", stdout=TRUE)
+              system(paste("mkdir", uuid, sep=" "))
+              system(paste0("cp serverWindNinja.R ", uuid, "/server.R"))
+              system(paste0("cp uiWindNinja.R ", uuid, "/ui.R")
+              
+              system2("./mailMessage.bash", input$email, paste0("forest.moscowfsl.wsu.edu:3838/shinyWindNinja/", uuid))
+              
+              h4("Project created! An email has been sent with the link to your project page.")
+          }
+  })
+  
+  addCreateProjectText <- reactive({
+      if(input$createProject > 0){
+          isolate({
+              generateEmail()
+          })
+           
+      }
+  })
+  
+  output$projectText <- renderUI({
+      addCreateProjectText()
+  })  
+  
+})  
 
