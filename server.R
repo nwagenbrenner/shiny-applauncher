@@ -21,6 +21,9 @@ shinyServer(function(input, output, session) {
               system(paste("mkdir", uuid, sep=" "))
               system(paste0("cp serverWindNinja.R ", uuid, "/server.R"))
               system(paste0("cp uiWindNinja.R ", uuid, "/ui.R"))
+              system(paste0("cp -r www/ ", uuid))
+              system(paste0("cp ascii2vectorsSP.R ", uuid))
+              
               
               system2("./mailMessage.bash", input$email, paste0("forest.moscowfsl.wsu.edu:3838/shinyWindNinja/", uuid))
               
