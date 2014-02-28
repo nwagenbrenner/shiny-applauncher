@@ -38,12 +38,7 @@ textInputRow<-function (inputId, label, value = "")
 #==================================================================
 
 shinyServer(function(input, output, session) {
-#-----------------------------------------------------
-#    set up directory for output based on uuid 
-#-----------------------------------------------------
-  uuid<-system2("uuidgen", "-r", stdout=TRUE)
-  system(paste("mkdir", uuid, sep=" "))
-  
+ 
 #-----------------------------------------------------
 #    Add run button 
 #----------------------------------------------------- 
@@ -80,7 +75,7 @@ shinyServer(function(input, output, session) {
 
   writeCfg <- reactive({
   isolate({
-      cfg<-paste0(uuid, "/windninja.cfg")
+      cfg<-"windninja.cfg"
       cat("num_threads = 2\n",file=cfg)
       cat(paste("vegetation = ", input$vegetation, "\n", collapse=""), file=cfg, append=TRUE)
 
@@ -96,13 +91,13 @@ shinyServer(function(input, output, session) {
       else if(input$elevation == "uploadDem"){
           #move the file to working dir and rename
           if(length(input$demFile$datapath) == 2){
-              system(paste("mv ",  input$demFile$datapath[1], paste0(uuid,"/dem.asc")))
-              system(paste("mv ",  input$demFile$datapath[2], paste0(uuid,"/dem.prj")))
+              system(paste("mv ",  input$demFile$datapath[1], "dem.asc"))
+              system(paste("mv ",  input$demFile$datapath[2], "dem.prj"))
           }
           else{
-              system(paste("mv ",  input$demFile$datapath, paste0(uuid,"/dem.asc")))
+              system(paste("mv ",  input$demFile$datapath, "dem.asc"))
           }
-          demFile = paste0(uuid,"/dem.asc")
+          demFile = "dem.asc"
           cat(paste("elevation_file = ", demFile, "\n"), file=cfg, append=TRUE)
       }
       cat(paste("time_zone = auto-detect\n", collapse=""), file=cfg, append=TRUE)
@@ -203,7 +198,7 @@ shinyServer(function(input, output, session) {
          unlink ("wnpipe")
          system("mkfifo wnpipe")
          system(paste("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", 
-                paste0(uuid,"/windninja.cfg"), ">> wnpipe",
+                "windninja.cfg", ">> wnpipe",
                 collapse=""), intern=FALSE, wait=FALSE)
                 
          
@@ -243,7 +238,7 @@ shinyServer(function(input, output, session) {
   output$downloadData <- downloadHandler(
          filename = function() { paste("windninja_output", '.tar.gz', sep='') },
          content = function(file) {
-           tar(file,uuid, compression="gzip") 
+           tar(file, ".", compression="gzip") 
          }
   )
 
@@ -256,10 +251,10 @@ shinyServer(function(input, output, session) {
       if(length(input$run_wn) > 0){ 
           if(input$run_wn==1 && input$outGoogleMaps == 1){
           
-              spdFiles<-paste0(uuid,"/",system(paste("ls -t", uuid, "| grep vel.asc", sep=" "), intern = TRUE))
+              spdFiles<-system("ls -t | grep vel.asc", intern = TRUE)
               spd<-raster(spdFiles[1]) # get the most recent one
           
-              angFiles<-paste0(uuid,"/",system(paste("ls -t", uuid, "| grep ang.asc", sep=" "), intern = TRUE))
+              angFiles<-system("ls -t | grep ang.asc", intern = TRUE)
               ang<-raster(angFiles[1]) # get the most recent one
 
               vectors<-brick(spd, ang)
@@ -277,9 +272,7 @@ shinyServer(function(input, output, session) {
                            mapTypeId='HYBRID',strokeWeight=2,
                            clickable=FALSE,openMap=FALSE)
                            
-          
-              system(paste("mv wind_vect.htm", uuid, sep=" "))
-              system("mv Legend* www/")
+              system("mv wind_vect.htm Legend* www/")
               
               paste("")
               #paste("Google Maps output written.")
@@ -299,9 +292,9 @@ shinyServer(function(input, output, session) {
       if(length(input$run_wn) > 0){   
           if(input$run_wn==1 && 
              input$outGoogleMaps == 1 && 
-             "wind_vect.htm" %in% dir(uuid)){
+             "wind_vect.htm" %in% dir("www")){
               tags$iframe(
-                  srcdoc = paste(readLines(paste0(uuid,'/wind_vect.htm')), collapse = '\n'),
+                  srcdoc = paste(readLines('www/wind_vect.htm'), collapse = '\n'),
                   width = "100%",
                   height = "600px"
               )
