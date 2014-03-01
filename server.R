@@ -12,9 +12,20 @@ shinyServer(function(input, output, session) {
       system(paste0("cp windninja/ui.R ../userWork/", uuid))
       system(paste0("cp -r windninja/www/ ../userWork/", uuid))
       system(paste0("cp windninja/ascii2vectorsSP.R ../userWork/", uuid))
-      system2("./mailMessage.bash", c(input$email, uuid, "WindNinja"))
+      system2("./mailMessage.bash", c(input$email, uuid, "WindNinja", "webNinja", input$project))
       h4("WindNinja project created! An email has been sent with the link to your project page.")
   }
+  makeFVS<-function(){
+      system(paste0("cp -r fvs/* ../userWork/", uuid))
+      system2("./mailMessage.bash", c(input$email, uuid, "FVS", "webFVS", input$project))
+      h4("FVS project created! An email has been sent with the link to your project page.")
+  }
+  makeHiresWind<-function(){
+      system(paste0("cp -r hiresWind/* ../userWork/", uuid))
+      system2("./mailMessage.bash", c(input$email, uuid, "WindData", "webWindData", input$project))
+      h4("Wind Data project created! An email has been sent with the link to your project page.")
+  }
+
   
   generateEmail <- reactive({
           if(input$email == " " && input$project == " "){
@@ -34,10 +45,10 @@ shinyServer(function(input, output, session) {
                   makeNinja()
               }
               else if(input$shinyApp == "fvs"){
-                  h4("Try again, only WindNinja is currently available.")
+                 makeFVS()
               }
               else if(input$shinyApp == "hireswind"){
-                  h4("Try again, only WindNinja is currently available.")
+                 makeHiresWind()
               }
           }
   })
