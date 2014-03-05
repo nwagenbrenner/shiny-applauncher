@@ -5,7 +5,7 @@ sender=$4
 id=$5
 mailx -t $emailAddress \
  -a "From: $sender" \
- -a "Subject: $shinyApp account created" \
+ -a "Subject: $shinyApp project created" \
  -a "Reply-To: Natalie Wagenbrenner <nwagenbrenner@gmail.com>" \
  -a "Cc: nwagenbrenner@gmail.com" <<!
 
