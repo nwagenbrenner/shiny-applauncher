@@ -43,7 +43,7 @@ shinyServer(function(input, output, session) {
               
               idFile<-paste0("../userWork/",uuid,"/id.txt")
               cat(paste("email = ", input$email, "\n", collapse=""), file=idFile)
-              cat(paste("project type = ", input$shinApp, "\n", collapse=""), file=idFile, append=TRUE)
+              cat(paste("project type = ", input$shinyApp, "\n", collapse=""), file=idFile, append=TRUE)
               cat(paste("project name = ", input$project, "\n", collapse=""), file=idFile, append=TRUE)
               
               if(input$shinyApp == "windninja"){
