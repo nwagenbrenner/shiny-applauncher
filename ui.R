@@ -36,7 +36,8 @@ shinyUI(bootstrapPage(
          radioButtons("shinyApp", " ", 
                     c( "WindNinja" = "windninja", 
                        "Forest Vegetation Simulator" = "fvs",
-                       "High-resolution Surface Wind Data Access" = "hireswind" ))
+                       "High-resolution Surface Wind Data Access" = "hireswind",
+                       "LiDAR Tree Extractor" = "lidar" ))
          )
        ),
        

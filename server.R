@@ -25,6 +25,11 @@ shinyServer(function(input, output, session) {
       system2("./mailMessage.bash", c(input$email, uuid, "WindData", "webWindData", input$project))
       h4("Wind Data project created! An email has been sent with the link to your project page.")
   }
+  makeLidar<-function(){
+      system(paste0("cp -r lidar/* ../userWork/", uuid))
+      system2("./mailMessage.bash", c(input$email, uuid, "LiDAR", "webLiDAR", input$project))
+      h4("LiDAR Tree Extractor project created! An email has been sent with the link to your project page.")
+  }
 
   
   generateEmail <- reactive({
@@ -55,6 +60,9 @@ shinyServer(function(input, output, session) {
               else if(input$shinyApp == "hireswind"){
                  makeHiresWind()
               }
+              else if(input$shinyApp == "lidar"){
+                 makeLidar()
+              }
           }
   })
   
@@ -69,7 +77,8 @@ shinyServer(function(input, output, session) {
   
   output$projectText <- renderUI({
       addCreateProjectText()
-  })  
+  })
+  
   
 })  
 
