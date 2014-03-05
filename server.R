@@ -29,13 +29,13 @@ shinyServer(function(input, output, session) {
   
   generateEmail <- reactive({
           if(input$email == " " && input$project == " "){
-              return(h4("Enter valid email address and project name."))
+              return(h4("Enter valid email address and project name.", style = "color:red"))
           }
           if(input$email == " "){
-              return(h4("Enter valid email address."))
+              return(h4("Enter valid email address.", style = "color:red"))
           }
           if(input$project == " "){
-              return(h4("Enter project name."))
+              return(h4("Enter project name.", style = "color:red"))
           }
           else{
               uuid<<-system2("uuidgen", "-r", stdout=TRUE)

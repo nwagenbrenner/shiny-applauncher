@@ -20,13 +20,13 @@ shinyUI(bootstrapPage(
       #col(1, img(src = "wn-icon.png", height = 40, width = 40)),
       #col(1.5, img(src = "burning_ninja_text3_web.png", height = 240, width = 120)),
       col(1, img(src = "wn-desktop.ico", height = 40, width = 40)),
-      col(1, img(src = "FVSlogo.png", height = 40, width = 40))
+      col(1, img(src = "FVSlogo.png", height = 43, width = 43))
     ),
     
     tags$hr(),
     
     row(
-      col(8, h4('1. Choose the type of application you want to create.'))
+      col(8, h4('1. Choose a project type:'))
     ),
     
     #tags$br(),
@@ -43,7 +43,7 @@ shinyUI(bootstrapPage(
     tags$br(),
     
     row(
-      col(8, h4('2. Enter an email address and project name to create your project space.'))
+      col(8, h4('2. Enter your email address and a project name:'))
     ),
     
     tags$br(),
@@ -85,7 +85,7 @@ shinyUI(bootstrapPage(
     row(
       tags$br(),
       col(2, HTML('<a href="http://www.firemodels.org/index.php/windninja-introduction">WindNinja</a>')),
-      col(2, HTML('<a href="http://www.firemodels.org/index.php/windninja-support/windninja-contact-us">Contact</a>'))
+      col(2, HTML('<a href="http://www.fs.fed.us/research/people/profile.php?alias=ncrookston">Contact</a>'))
     ),
     row(
       col(2, HTML('<a href="http://www.fs.fed.us/fmsc/fvs/">FVS</a>'))
