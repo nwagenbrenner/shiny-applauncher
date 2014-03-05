@@ -168,12 +168,22 @@ shinyUI(bootstrapPage(
       tags$br(),
       
       row(
-      col(8,
+      col(12,
           tags$br(),
           uiOutput('mymap')
       )
       ),
       
+      tags$br(),
+
+      row(
+         col(3, htmlOutput('cleanupButton')) 
+      ),
+
+      row(
+         col(3, htmlOutput('cleanupText'))
+      ),
+
       tags$hr(),
 
       row(

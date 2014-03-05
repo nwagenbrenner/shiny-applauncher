@@ -61,7 +61,8 @@ shinyServer(function(input, output, session) {
           h4("Start run!")
       }
       else{
-          h4("Specifiy the elevation input to get started.")
+          if(!("windninja.cfg" %in% dir()))
+          h4("Specify the elevation input to get started.")
       }
   })
   
@@ -197,7 +198,7 @@ shinyServer(function(input, output, session) {
          writeCfg()
          unlink ("wnpipe")
          system("mkfifo wnpipe")
-         system(paste("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", 
+         system(paste("WindNinja_cli", 
                 "windninja.cfg", ">> wnpipe",
                 collapse=""), intern=FALSE, wait=FALSE)
                 
@@ -229,6 +230,9 @@ shinyServer(function(input, output, session) {
 
           downloadButton('downloadData', 'Download Output Files')
       }
+      if("windninja.cfg" %in% dir()){
+          downloadButton('downloadData', 'Download Output Files')
+      }
   })
   
   output$downloadButton <- renderUI({
@@ -238,10 +242,40 @@ shinyServer(function(input, output, session) {
   output$downloadData <- downloadHandler(
          filename = function() { paste("windninja_output", '.tar.gz', sep='') },
          content = function(file) {
-           tar(file, ".", compression="gzip") 
+           tar(file,".", compression="gzip") 
          }
   )
 
+#-----------------------------------------------------
+#  Clean up for another run 
+#-----------------------------------------------------
+createCleanupButton<-reactive({
+    if("windninja.cfg" %in% dir()){
+        actionButton('clean_up', 'Clean Up')
+    }
+    else{
+        h4("")
+    }
+})
+output$cleanupButton<-renderUI({
+    createCleanupButton()
+})
+cleanup<-reactive({
+    #isolate({
+        if(length(input$clean_up) > 0 && input$clean_up > 0){
+            unlink("windninja.cfg")
+            unlink("*.asc")
+            unlink("*.prj")
+            unlink("www/L*")
+            unlink("www/wind_vect.htm")
+            h4("Project space cleaned up.")
+        }
+    #})
+})
+
+output$cleanupText<-renderUI({
+    cleanup()
+})
 
 #---------------------------------------------------------
 # convert ascii grids to Google Maps format and display
@@ -289,7 +323,7 @@ shinyServer(function(input, output, session) {
     })
 
   displayMap <- reactive({
-      if(length(input$run_wn) > 0){   
+      if(length(input$run_wn) > 0 ){   
           if(input$run_wn==1 && 
              input$outGoogleMaps == 1 && 
              "wind_vect.htm" %in% dir("www")){
@@ -299,6 +333,13 @@ shinyServer(function(input, output, session) {
                   height = "600px"
               )
           }
+      }
+      if("wind_vect.htm" %in% dir("www")){
+         tags$iframe(
+             srcdoc = paste(readLines('www/wind_vect.htm'), collapse = '\n'),
+             width = "100%",
+             height = "600px"
+        )   
       }
   })
 
