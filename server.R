@@ -44,7 +44,7 @@ shinyServer(function(input, output, session) {
           if(input$email == " " && input$project == " "){
               return(h4("Enter valid email address and project name.", style = "color:red"))
           }
-          if(input$email == " "){
+          else if(input$email == " "){
               return(h4("Enter valid email address.", style = "color:red"))
           }
           if(input$project == " "){
