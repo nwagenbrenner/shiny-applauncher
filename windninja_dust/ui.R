@@ -1,17 +1,6 @@
 library(leaflet)
 library(ShinyDash)
-#library(shinyIncubator)
 library(shiny)
-#install_github('ShinyDash', 'trestletech')
-#install_github('leaflet-shiny', 'jcheng5')
-
-row <- function(...) {
-  tags$div(class="row", ...)
-}
-
-col <- function(width, ...) {
-  tags$div(class=paste0("span", width), ...)
-}
 
 actionLink <- function(inputId, ...) {
   tags$a(href='javascript:void',
@@ -27,171 +16,109 @@ textInputRow<-function (inputId, label, value = "")
         tags$input(id = inputId, type = "text", value = value, class="input-small"))
 }
 
-shinyUI(bootstrapPage(
-  tags$head(tags$link(rel='stylesheet', type='text/css', href='styles.css'), 
-           tags$style("label.radio { display: inline-block; }", ".radio input[type=\"radio\"] { float: none; }")
-           ),
-  leafletMap(
-    "map", "100%", 400,
-    #initialTileLayer = "http://{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
-    #initialTileLayerAttribution = HTML('Maps by <a href="http://www.mapbox.com/">Mapbox</a>'),
-    options=list(
-      center = c(40.45, -110.85),
-      zoom = 5,
-      maxBounds = list(list(17, -180), list(59, 180))
+shinyUI(fluidPage(
+
+  fluidRow(
+    column(12,
+      h2("Test WindNinja-Dust Interface"),
+     
+      hr()
+
     )
   ),
-  
 
-  tags$div(
-      class = "container",
-    row(
-      col(5, h2('Test WindNinja Interface'))
-    ),
+  #titlePanel("Test WindNinja-Dust Interface"),
 
-  tags$hr(),
-
-    row(
-      col(3.5,
-        h4('1. Input'),
-        selectInput("elevation", "Elevation input:",
-                list(#"Select from map" = "swoopMap",
-                     "Upload DEM" = "uploadDem", 
-                     "Enter bounding box coordinates" = "boundingBox")),
-
-        div(style="width:220px", htmlOutput("demUploader")),
+  #title = 'Test WindNinja-Dust Interface',
+      
+  fluidRow(
+    column(4, 
+      wellPanel(
+      h4('1. Input'),
         
-        div(style="display:inline-block", htmlOutput("nField")),
-        div(style="display:inline-block", htmlOutput("sField")),
-        tags$br(),
-        div(style="display:inline-block", htmlOutput("wField")),
-        div(style="display:inline-block", htmlOutput("eField")),
-        
-        tags$br(),
-        tags$br(),
-    
-        selectInput("initializationMethod", "Simulation type:",
+      div(style="width:220px", 
+          fileInput("firePerimeterFile", "Upload fire perimeter:", multiple=TRUE, accept=NULL)
+         ),
+         
+      selectInput("initializationMethod", "Wind input:",
                 list("Domain average" = "domainAverageInitialization")), 
                      #"Point initialization" = "pointInitialization",
                      #"Weather model" = "wxModelInitialization")),
         
-        tags$br(),
+      br(),
         
-        div(style="display:inline-block", htmlOutput("inputHeightField")),
-        div(class="input-mini",style="display:inline-block",htmlOutput("unitsInputHeightField")),
+      div(style="display:inline-table", htmlOutput("inputHeightField")),
+      div(style="display:inline-table; width: 70px",htmlOutput("unitsInputHeightField")),
         
-        tags$br(),
+      br(),
 
-        div(style="display:inline-block", htmlOutput("inputSpeedField")),
-        div(class="input-mini",style="display:inline-block; width: 20px;",htmlOutput("unitsInputSpeedField")),
+      div(style="display:inline-table", htmlOutput("inputSpeedField")),
+      div(style="display:inline-table; width: 70px;",htmlOutput("unitsInputSpeedField")),
         
-        tags$br(),
+      br(),
         
-        htmlOutput("inputDirectionField"),
+      htmlOutput("inputDirectionField"),
 
-        selectInput("vegetation", "Vegetation type:",
+      selectInput("vegetation", "Vegetation type:",
                 list("Grass" = "grass", 
                      "Shrubs" = "shrubs",
                      "Trees" = "trees")),
-        selectInput("meshChoice", "Mesh choice:",
+      selectInput("meshChoice", "Mesh choice:",
                 list("Coarse" = "coarse",
                      "Medium" = "medium",
                      "Fine" = "fine"
                      )),
-        tags$br(),
+      br(),
                
-        div(style = "display:inline-block ", htmlOutput("outputHeightField")),
-        div(style = "display:inline-block; width: 20%;",htmlOutput("unitsOutputHeightField"))
-      ),
-     
-      col(4,
-        h4('2. Additional options'),
-        #selectInput("timeZone", "Time zone:",
-        #        c(t$ID[1:length(t$ID)]),
-        #        t$ID[65]
-        #        ),
+      div(style = "display:inline-table", htmlOutput("outputHeightField")),
+      div(style = "display:inline-table; width: 70px",htmlOutput("unitsOutputHeightField"))
+      )           
+    ),
 
-        checkboxInput("diurnalInput", "Use diurnal wind", FALSE),
-        checkboxInput("stabilityInput", "Use non-neutral stability", FALSE),
+    column(3,
+      wellPanel(
+      h4('2. Additional options'),
+      
+      checkboxInput("diurnalInput", "Use diurnal wind", FALSE),
+      checkboxInput("stabilityInput", "Use non-neutral stability", FALSE),
+      
+      br(),
+      
+      div(style="display:inline-table", htmlOutput("yearField")),
+      div(style="display:inline-table", htmlOutput("monthField")),
+      #br(),
+      div(style="display:inline-table", htmlOutput("dayField")),
+      div(style="display:inline-table", htmlOutput("hourField")),
+      div(style="display:inline-table", htmlOutput("minuteField")),
         
-        tags$br(),
+      br(),
+      br(),
         
-        div(style="display:inline-block", htmlOutput("yearField")),
-        div(style="display:inline-block", htmlOutput("monthField")),
-        #tags$br(),
-        div(style="display:inline-block", htmlOutput("dayField")),
-        div(style="display:inline-block", htmlOutput("hourField")),
-        div(style="display:inline-block", htmlOutput("minuteField")),
+      div(style="display:inline-table", htmlOutput("inputAirTempField")),
+      div(style="display:inline-table; width: 90px",htmlOutput("unitsInputAirTempField")),
         
-        tags$br(),
-        tags$br(),
-        
-        div(style="display:inline-block", htmlOutput("inputAirTempField")),
-        div(class="input-mini",style="display:inline-block",htmlOutput("unitsInputAirTempField")),
-        
-        tags$br(),
+      br(),
 
-        div(style="display:inline-block", htmlOutput("inputCloudCoverField")),
-        div(class="input-mini",style="display:inline-block; width: 20px;",htmlOutput("unitsInputCloudCoverField")),
+      div(style="display:inline-table", htmlOutput("inputCloudCoverField")),
+      div(style="display:inline-table; width: 90px;",htmlOutput("unitsInputCloudCoverField")),
         
-        tags$br()
-        
-
-      ),
-      col(4,
-        h4('3. Output'),
-        h5("Choose output format(s):"),
-        checkboxInput("outGoogleMaps", "Google Maps", TRUE),
-        helpText(em("Viewable on your smart phone")), 
-        checkboxInput("outGoogleEarth", "Google Earth", FALSE), 
-        checkboxInput("outFire", "Fire Behavior", FALSE),
-        checkboxInput("outShape", "Shape Files", FALSE),
-        checkboxInput("outVtk", "VTK Files", FALSE)
+      br()
       )
-      ),
-      
-      tags$hr(),
-      
-      row(
-      col(0.5, htmlOutput('runButtonText')),
-      col(2, htmlOutput('runButton')),
-      #col(2, actionButton('run_wn', img(src = "wn-icon.png", height = 40, width = 40))),
-      
-      col(8, textOutput("runSubmittedMessage")),# style = "color:darkblue"),
-      #col(8, textOutput("runFinishedMessage"), style = "color:blue"),
-      col(4, htmlOutput('wnText'), style = "color:darkblue"),
-      col(4, htmlOutput('convertToGoogleMapsText')),# style = "color:darkblue")
-      tags$br(),
-      col(8, htmlOutput('downloadButton'))
-      ),
-      
-      tags$br(),
-      
-      row(
-      col(12,
-          tags$br(),
-          uiOutput('mymap')
+  
+    ),
+    column(3,
+      wellPanel(
+      h4('3. Output'),
+      h5("Choose output format(s):"),
+      checkboxInput("outGoogleMaps", "Google Maps", TRUE),
+      helpText(em("Viewable on your smart phone")), 
+      checkboxInput("outGoogleEarth", "Google Earth", FALSE), 
+      checkboxInput("outFire", "ASCII files", FALSE)
       )
-      ),
-      
-      tags$br(),
+    )
+  )
+  
+  ))
+  
 
-      row(
-         col(3, htmlOutput('cleanupButton')) 
-      ),
 
-      row(
-         col(3, htmlOutput('cleanupText'))
-      ),
-
-      tags$hr(),
-
-      row(
-      col(3, HTML('<a href="http://www.firemodels.org/index.php/windninja-introduction">About WindNinja</a>')),
-      col(3, HTML('<a href="http://www.firemodels.org/index.php/windninja-support/windninja-contact-us">Contact</a>')),
-      col(3, HTML('<a href="https://collab.firelab.org/software/projects/windninja">Development</a>'))
-      ),
-      
-      tags$br()
-    ) #end tags$div(class='container') 
-))
