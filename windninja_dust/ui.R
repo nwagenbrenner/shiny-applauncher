@@ -116,7 +116,50 @@ shinyUI(fluidPage(
       checkboxInput("outFire", "ASCII files", FALSE)
       )
     )
-  )
+  ),
+  
+  tags$hr(),
+      
+  fluidRow(
+    column(1, htmlOutput('runButtonText')),
+    column(1, htmlOutput('runButton')),
+      
+    column(1, textOutput("runSubmittedMessage")),# style = "color:darkblue"),
+    column(1, textOutput("runFinishedMessage")),
+    column(1, htmlOutput('wnText')),
+    column(1, htmlOutput('convertToGoogleMapsText')),# style = "color:darkblue")
+    tags$br(),
+    column(1, htmlOutput('downloadButton'))
+  ),
+      
+  tags$br(),
+      
+  fluidRow(
+    column(11,
+      tags$br(),
+      uiOutput('mymap')
+    )
+  ),
+      
+  tags$br(),
+
+  fluidRow(
+    column(3, htmlOutput('cleanupButton')) 
+  ),
+
+  fluidRow(
+    column(3, htmlOutput('cleanupText'))
+  ),
+
+  tags$hr(),
+
+  fluidRow(
+    column(3, HTML('<a href="http://www.firemodels.org/index.php/windninja-introduction">About WindNinja</a>')),
+    column(3, HTML('<a href="http://www.firemodels.org/index.php/windninja-support/windninja-contact-us">Contact</a>')),
+    column(3, HTML('<a href="https://collab.firelab.org/software/projects/windninja">Development</a>'))
+  ),
+      
+  tags$br()
   
   ))
   
