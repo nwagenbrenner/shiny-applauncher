@@ -4,6 +4,8 @@ library(maps)
 library(raster)
 library(plotGoogleMaps)
 #library(shinyIncubator)
+library(maptools)
+library(rgdal)
 
 #default max upload size is 5MB, increase to 30.
 options(shiny.maxRequestSize=30*1024^2)
@@ -44,7 +46,7 @@ shinyServer(function(input, output, session) {
 #----------------------------------------------------- 
 
   addRunButton <- reactive({
-      if(input$elevation == "boundingBox" || length(input$demFile) > 0){
+      if(length(input$firePerimeterFile) > 0){
           actionButton('run_wn', img(src = "wn-icon.png", height = 40, width = 40))
       }
       else{
@@ -57,12 +59,11 @@ shinyServer(function(input, output, session) {
   })
   
   addRunButtonText <- reactive({
-      if(input$elevation == "boundingBox" || length(input$demFile) > 0){
+      if(length(input$firePerimeterFile) > 0){
           h4("Start run!")
       }
       else{
-          if(!("windninja.cfg" %in% dir()))
-          h4("Specify the elevation input to get started.")
+          h4("Specify the fire perimeter input to get started.")
       }
   })
   
@@ -78,29 +79,49 @@ shinyServer(function(input, output, session) {
   isolate({
       cfg<-"windninja.cfg"
       cat("num_threads = 2\n",file=cfg)
-      cat(paste("vegetation = ", input$vegetation, "\n", collapse=""), file=cfg, append=TRUE)
-
-      if(input$elevation == "boundingBox"){
-          cat(paste("fetch_elevation = dem.tif\n"), file=cfg, append=TRUE)
-          cat(paste("elevation_source = us_srtm\n"), file=cfg, append=TRUE)
-          cat(paste("north = ", input$northExtent, "\n", collapse=""),file=cfg, append=TRUE)
-          cat(paste("south = ", input$southExtent, "\n", collapse=""),file=cfg, append=TRUE)
-          cat(paste("east = ", input$eastExtent, "\n", collapse=""),file=cfg, append=TRUE)
-          cat(paste("west = ", input$westExtent, "\n", collapse=""),file=cfg, append=TRUE)
+      
+      cat("compute_friction_velocity = true\n",file=cfg, append=TRUE)
+      cat("compute_emissions = true\n",file=cfg, append=TRUE)
+      
+      #move the zipped fire perimeter files to working dir and rename
+      system(paste("mv ",  input$firePerimeterFile$datapath[1], "perimeter.zip"))
+      shape_list<-unzip('perimeter.zip', list=TRUE)
+      shp<-shape_list$Name[1]
+      shp<-paste0(substr(shp, 1, nchar(shp)-4), ".shp") 
+      unzip("perimeter.zip", exdir='perimeter')
+      cat(paste0("fire_perimeter_file = perimeter/", shp, "\n"), file=cfg, append=TRUE)
+      
+      #use rgdal to get CRS
+      dsn <- "perimeter"
+      shp_base <- substr(shp, 1, nchar(shp)-4)
+      sp<-readShapeSpatial(paste0(dsn, "/", shp_base))
+      proj4string(sp) <- OGRSpatialRef(dsn=dsn, layer=shp_base)
+      
+      latlon_crs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=GRS80 +towgs84=0,0,0"
+      
+      #check for latlon CRS and transform if necessary
+      if(proj4string(sp) != latlon_crs){
+          sp<-spTransform(sp, CRS(latlon_crs))
       }
-
-      else if(input$elevation == "uploadDem"){
-          #move the file to working dir and rename
-          if(length(input$demFile$datapath) == 2){
-              system(paste("mv ",  input$demFile$datapath[1], "dem.asc"))
-              system(paste("mv ",  input$demFile$datapath[2], "dem.prj"))
-          }
-          else{
-              system(paste("mv ",  input$demFile$datapath, "dem.asc"))
-          }
-          demFile = "dem.asc"
-          cat(paste("elevation_file = ", demFile, "\n"), file=cfg, append=TRUE)
-      }
+      
+      
+      
+      north <- bbox(sp)[4]
+      south <- bbox(sp)[2]
+      east <- bbox(sp)[3]
+      west <- bbox(sp)[1] 
+      
+      #!!!!!!!for testing!!!!
+      #cat("elevation_file = long_draw_dem.tif\n",file=cfg, append=TRUE)  
+      #fetch DEM based on fire perimeter
+      cat(paste("fetch_elevation = dem.tif\n"), file=cfg, append=TRUE)
+      cat(paste("elevation_source = us_srtm\n"), file=cfg, append=TRUE)
+      cat(paste("north = ", north, "\n", collapse=""),file=cfg, append=TRUE)
+      cat(paste("south = ", south, "\n", collapse=""),file=cfg, append=TRUE)
+      cat(paste("east = ", east, "\n", collapse=""),file=cfg, append=TRUE)
+      cat(paste("west = ", west, "\n", collapse=""),file=cfg, append=TRUE)
+      
+      cat("vegetation = grass\n", file=cfg, append=TRUE)
       cat(paste("time_zone = auto-detect\n", collapse=""), file=cfg, append=TRUE)
       cat(paste("initialization_method = ", input$initializationMethod, "\n", collapse=""), file=cfg, append=TRUE)
 
@@ -129,20 +150,14 @@ shinyServer(function(input, output, session) {
           cat(paste("hour = ", input$hour, "\n", collapse=""), file=cfg, append=TRUE)
           cat(paste("minute = ", input$minute, "\n", collapse=""), file=cfg, append=TRUE)
       }
-      cat(paste("output_wind_height = ", input$outputWindHeight, "\n", collapse=""), file=cfg, append=TRUE)
-      cat(paste("units_output_wind_height = ", input$unitsOutputWindHeight, "\n", collapse=""), file=cfg, append=TRUE)
+      cat("output_wind_height = 10\n", file=cfg, append=TRUE)
+      cat("units_output_wind_height = m\n", file=cfg, append=TRUE)
       cat(paste("mesh_choice = ", input$meshChoice, "\n", collapse=""), file=cfg, append=TRUE)
       if(input$outFire == 1 || input$outGoogleMaps == 1){
           cat("write_ascii_output = true\n", file=cfg, append=TRUE)
       }
       if(input$outGoogleEarth == 1){
           cat("write_goog_output = true\n", file=cfg, append=TRUE)
-      }
-      if(input$outShape == 1){
-          cat("write_shapefile_output = true\n", file=cfg, append=TRUE)
-      }
-      if(input$outVtk == 1){
-          cat("write_vtk_output = true\n", file=cfg, append=TRUE)
       }
       })
   })
@@ -198,11 +213,12 @@ shinyServer(function(input, output, session) {
          writeCfg()
          unlink ("wnpipe")
          system("mkfifo wnpipe")
-         system(paste("WindNinja_cli", 
+         #system(paste("WindNinja_cli", 
+         #       "windninja.cfg", ">> wnpipe",
+         #       collapse=""), intern=FALSE, wait=FALSE)
+         system(paste("NINJA_FILL_DEM_NO_DATA=YES", "/home/natalie/windninja_trunk/build/src/cli/WindNinja_cli", 
                 "windninja.cfg", ">> wnpipe",
                 collapse=""), intern=FALSE, wait=FALSE)
-                
-         
          fileName="wnpipe"
          con=fifo(fileName,open="rt",blocking=TRUE)
          linn = " "
@@ -230,9 +246,6 @@ shinyServer(function(input, output, session) {
 
           downloadButton('downloadData', 'Download Output Files')
       }
-      if("windninja.cfg" %in% dir()){
-          downloadButton('downloadData', 'Download Output Files')
-      }
   })
   
   output$downloadButton <- renderUI({
@@ -245,37 +258,6 @@ shinyServer(function(input, output, session) {
            tar(file,".", compression="gzip") 
          }
   )
-
-#-----------------------------------------------------
-#  Clean up for another run 
-#-----------------------------------------------------
-createCleanupButton<-reactive({
-    if("windninja.cfg" %in% dir()){
-        actionButton('clean_up', 'Clean Up')
-    }
-    else{
-        h4("")
-    }
-})
-output$cleanupButton<-renderUI({
-    createCleanupButton()
-})
-cleanup<-reactive({
-    #isolate({
-        if(length(input$clean_up) > 0 && input$clean_up > 0){
-            unlink("windninja.cfg")
-            unlink("*.asc")
-            unlink("*.prj")
-            unlink("www/L*")
-            unlink("www/wind_vect.htm")
-            h4("Project space cleaned up.")
-        }
-    #})
-})
-
-output$cleanupText<-renderUI({
-    cleanup()
-})
 
 #---------------------------------------------------------
 # convert ascii grids to Google Maps format and display
@@ -334,73 +316,10 @@ output$cleanupText<-renderUI({
               )
           }
       }
-      if("wind_vect.htm" %in% dir("www")){
-         tags$iframe(
-             srcdoc = paste(readLines('www/wind_vect.htm'), collapse = '\n'),
-             width = "100%",
-             height = "600px"
-        )   
-      }
   })
 
   output$mymap <- renderUI({
       displayMap()
-  })
-
-#-------------------------------------------------------------
-#   create elevation input options (bb or dem upload)
-#-------------------------------------------------------------
-  createSpace <- reactive({
-      if(input$elevation == "boundingBox"){
-          tags$br()
-      }
-  })
-  createNbox <- reactive({
-      if(input$elevation == "boundingBox"){
-          textInputRow("northExtent", "North:", "46.8468")
-      }
-  })
-  createSbox <- reactive({
-      if(input$elevation == "boundingBox"){
-          textInputRow("southExtent", "South:", "46.7856")
-      }
-  })
-  createEbox <- reactive({
-      if(input$elevation == "boundingBox"){
-          textInputRow("eastExtent", "East:", "-116.7914")
-      }
-  })
-  createWbox <- reactive({
-      if(input$elevation == "boundingBox"){
-          textInputRow("westExtent", "West:", "-116.9517")
-      }
-  })
-  createDemUpload <- reactive({
-      if(input$elevation == "uploadDem"){
-          fileInput("demFile", "Upload DEM:", multiple=TRUE, accept=NULL)
-      }
-  })
-
-  output$addExtraSpace <- renderUI({
-      createSpace()
-  })
-  output$addExtraSpace2 <- renderUI({
-      createSpace()
-  })
-  output$nField <- renderUI({
-      createNbox()
-  })
-  output$sField <- renderUI({
-      createSbox()
-  })
-  output$eField <- renderUI({
-      createEbox()
-  })
-  output$wField <- renderUI({
-      createWbox()
-  })
-  output$demUploader <- renderUI({
-      createDemUpload()
   })
 
 

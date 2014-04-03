@@ -32,12 +32,12 @@ shinyUI(fluidPage(
   #title = 'Test WindNinja-Dust Interface',
       
   fluidRow(
-    column(4, 
+    column(3, 
       wellPanel(
       h4('1. Input'),
         
       div(style="width:220px", 
-          fileInput("firePerimeterFile", "Upload fire perimeter:", multiple=TRUE, accept=NULL)
+          fileInput("firePerimeterFile", "Upload fire perimeter shapefiles:", multiple=TRUE, accept=NULL)
          ),
          
       selectInput("initializationMethod", "Wind input:",
@@ -59,23 +59,15 @@ shinyUI(fluidPage(
         
       htmlOutput("inputDirectionField"),
 
-      selectInput("vegetation", "Vegetation type:",
-                list("Grass" = "grass", 
-                     "Shrubs" = "shrubs",
-                     "Trees" = "trees")),
       selectInput("meshChoice", "Mesh choice:",
                 list("Coarse" = "coarse",
                      "Medium" = "medium",
                      "Fine" = "fine"
-                     )),
-      br(),
-               
-      div(style = "display:inline-table", htmlOutput("outputHeightField")),
-      div(style = "display:inline-table; width: 70px",htmlOutput("unitsOutputHeightField"))
-      )           
+                     ))
+      )
     ),
 
-    column(3,
+    column(2,
       wellPanel(
       h4('2. Additional options'),
       
@@ -100,13 +92,11 @@ shinyUI(fluidPage(
       br(),
 
       div(style="display:inline-table", htmlOutput("inputCloudCoverField")),
-      div(style="display:inline-table; width: 90px;",htmlOutput("unitsInputCloudCoverField")),
+      div(style="display:inline-table; width: 90px;",htmlOutput("unitsInputCloudCoverField"))
         
-      br()
       )
-  
     ),
-    column(3,
+    column(2,
       wellPanel(
       h4('3. Output'),
       h5("Choose output format(s):"),
@@ -124,12 +114,12 @@ shinyUI(fluidPage(
     column(1, htmlOutput('runButtonText')),
     column(1, htmlOutput('runButton')),
       
-    column(1, textOutput("runSubmittedMessage")),# style = "color:darkblue"),
-    column(1, textOutput("runFinishedMessage")),
-    column(1, htmlOutput('wnText')),
+    column(2, textOutput("runSubmittedMessage")),# style = "color:darkblue"),
+    #column(3, textOutput("runFinishedMessage")),
+    column(3, htmlOutput('wnText')),
     column(1, htmlOutput('convertToGoogleMapsText')),# style = "color:darkblue")
     tags$br(),
-    column(1, htmlOutput('downloadButton'))
+    column(2, htmlOutput('downloadButton'))
   ),
       
   tags$br(),
@@ -141,16 +131,6 @@ shinyUI(fluidPage(
     )
   ),
       
-  tags$br(),
-
-  fluidRow(
-    column(3, htmlOutput('cleanupButton')) 
-  ),
-
-  fluidRow(
-    column(3, htmlOutput('cleanupText'))
-  ),
-
   tags$hr(),
 
   fluidRow(
