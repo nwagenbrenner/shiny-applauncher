@@ -19,12 +19,18 @@ textInputRow<-function (inputId, label, value = "")
 shinyUI(fluidPage(
 
   fluidRow(
-    column(12,
-      h2("Test WindNinja-Dust Interface"),
-     
-      hr()
-
+    column(4,
+      h2("Test WindNinja-Dust Interface")
+    ),
+    column(5,
+      br(),
+      img(src = "wn-desktop.ico", height = 40, width = 40)
     )
+   
+  ),
+  
+  fluidRow(
+    column(12, hr())
   ),
 
   #titlePanel("Test WindNinja-Dust Interface"),
@@ -37,7 +43,7 @@ shinyUI(fluidPage(
       h4('1. Input'),
         
       div(style="width:220px", 
-          fileInput("firePerimeterFile", "Upload fire perimeter shapefiles:", multiple=TRUE, accept=NULL)
+          fileInput("firePerimeterFile", "Upload fire perimeter shapefiles (as .zip):", multiple=FALSE, accept=NULL)
          ),
          
       selectInput("initializationMethod", "Wind input:",
@@ -111,7 +117,7 @@ shinyUI(fluidPage(
   tags$hr(),
       
   fluidRow(
-    column(1, htmlOutput('runButtonText')),
+    column(3, htmlOutput('runButtonText')),
     column(1, htmlOutput('runButton')),
       
     column(2, textOutput("runSubmittedMessage")),# style = "color:darkblue"),
@@ -121,9 +127,9 @@ shinyUI(fluidPage(
     tags$br(),
     column(2, htmlOutput('downloadButton'))
   ),
-      
-  tags$br(),
-      
+  
+  br(),
+           
   fluidRow(
     column(11,
       tags$br(),
@@ -131,7 +137,7 @@ shinyUI(fluidPage(
     )
   ),
       
-  tags$hr(),
+  hr(),
 
   fluidRow(
     column(3, HTML('<a href="http://www.firemodels.org/index.php/windninja-introduction">About WindNinja</a>')),
@@ -139,7 +145,8 @@ shinyUI(fluidPage(
     column(3, HTML('<a href="https://collab.firelab.org/software/projects/windninja">Development</a>'))
   ),
       
-  tags$br()
+  br()
+  
   
   ))
   

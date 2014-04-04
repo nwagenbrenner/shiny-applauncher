@@ -63,7 +63,7 @@ shinyServer(function(input, output, session) {
           h4("Start run!")
       }
       else{
-          h4("Specify the fire perimeter input to get started.")
+          h4("Specify fire perimeter input to get started.")
       }
   })
   
@@ -281,7 +281,7 @@ shinyServer(function(input, output, session) {
               vectors_sp$angle<-vectors_sp$angle - 180
               vectors_sp$angle[vectors_sp$angle < 0] <- vectors_sp$angle[vectors_sp$angle < 0] + 360
           
-              wind_vect=vectorsSP(vectors_sp, maxlength=200, zcol=c('speed','angle'))
+              wind_vect=vectorsSP(vectors_sp, maxlength=300, zcol=c('speed','angle'))
               
             
               
