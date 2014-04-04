@@ -282,16 +282,26 @@ shinyServer(function(input, output, session) {
               vectors_sp$angle[vectors_sp$angle < 0] <- vectors_sp$angle[vectors_sp$angle < 0] + 360
           
               wind_vect=vectorsSP(vectors_sp, maxlength=200, zcol=c('speed','angle'))
+              
+            
+              
+              #dust raster
+              dustFiles<-system("ls -t | grep dust.asc", intern = TRUE)
+              dust<-raster(dustFiles[1]) # get the most recent one
+              dust_sp<-rasterToPoints(dust, spatial=TRUE)
+              dust_sp<-as(dust_sp,'SpatialPixelsDataFrame')
+              m1<-plotGoogleMaps(dust_sp, add=TRUE)
 
+              #wind vectors
               pal<-colorRampPalette(c("blue","green","yellow", "orange", "red"))
-              m=plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5),
+              m2<-plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5),
                            mapTypeId='HYBRID',strokeWeight=2,
+                           previousMap=m1,
                            clickable=FALSE,openMap=FALSE)
                            
-              system("mv wind_vect.htm Legend* www/")
+              system("mv wind_vect.htm Legend* grid* www/")
               
               paste("")
-              #paste("Google Maps output written.")
           }
       }
       else{
