@@ -281,23 +281,33 @@ shinyServer(function(input, output, session) {
               vectors_sp$angle<-vectors_sp$angle - 180
               vectors_sp$angle[vectors_sp$angle < 0] <- vectors_sp$angle[vectors_sp$angle < 0] + 360
           
-              wind_vect=vectorsSP(vectors_sp, maxlength=300, zcol=c('speed','angle'))
+              wind_vect=vectorsSP(vectors_sp, maxlength=400, zcol=c('speed','angle'))
               
-            
+              #colors for wind vectors
+              pal<-colorRampPalette(c("blue","green","yellow", "orange", "red"))                        
               
               #dust raster
               dustFiles<-system("ls -t | grep dust.asc", intern = TRUE)
               dust<-raster(dustFiles[1]) # get the most recent one
-              dust_sp<-rasterToPoints(dust, spatial=TRUE)
-              dust_sp<-as(dust_sp,'SpatialPixelsDataFrame')
-              m1<-plotGoogleMaps(dust_sp, add=TRUE)
-
-              #wind vectors
-              pal<-colorRampPalette(c("blue","green","yellow", "orange", "red"))
-              m2<-plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5),
+              
+              #check that there were emissions
+              v<-na.omit(as.data.frame(values(dust)))
+              if(max(v) > 0.0){
+                  #wind vectors
+                  m1<-plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5),
                            mapTypeId='HYBRID',strokeWeight=2,
-                           previousMap=m1,
+                           clickable=FALSE,openMap=FALSE, add=TRUE)
+                  
+                  dust_sp<-rasterToPoints(dust, spatial=TRUE)
+                  dust_sp<-as(dust_sp,'SpatialPixelsDataFrame')
+                  #emissions
+                  m2<-plotGoogleMaps(dust_sp, previousMap=m1)
+              }
+              else{ #if no emissions, just plot vectors
+                  m1<-plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5),
+                           mapTypeId='HYBRID',strokeWeight=2,
                            clickable=FALSE,openMap=FALSE)
+              }
                            
               system("mv wind_vect.htm Legend* grid* www/")
               
