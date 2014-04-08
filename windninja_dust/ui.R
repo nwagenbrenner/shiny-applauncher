@@ -1,6 +1,7 @@
 library(leaflet)
 library(ShinyDash)
 library(shiny)
+library(shinyIncubator)
 
 actionLink <- function(inputId, ...) {
   tags$a(href='javascript:void',
@@ -18,6 +19,7 @@ textInputRow<-function (inputId, label, value = "")
 
 shinyUI(fluidPage(
   #plotOutput('main_plot'),
+  
   fluidRow(
     column(4,
       h2("Test WindNinja-Dust Interface")
@@ -114,7 +116,9 @@ shinyUI(fluidPage(
   fluidRow(
     column(1, htmlOutput('runButtonText')),
     column(1, htmlOutput('runButton')),
-    column(3, textOutput("runSubmittedMessage"))# style = "color:darkblue"),
+    column(3, textOutput("runSubmittedMessage")),
+    progressInit(),
+    column(3, htmlOutput('wnText'))
   ),
   hr(),
       
@@ -122,8 +126,6 @@ shinyUI(fluidPage(
   
       
   fluidRow(
-    #column(3, textOutput("runFinishedMessage")),
-    column(3, htmlOutput('wnText')),
     column(1, htmlOutput('convertToGoogleMapsText')),# style = "color:darkblue")
     tags$br(),
     column(2, htmlOutput('downloadButton'))

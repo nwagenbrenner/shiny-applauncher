@@ -3,7 +3,7 @@ library(leaflet)
 library(maps)
 library(raster)
 library(plotGoogleMaps)
-#library(shinyIncubator)
+library(shinyIncubator)
 library(maptools)
 library(rgdal)
 
@@ -185,6 +185,7 @@ shinyServer(function(input, output, session) {
     output$runSubmittedMessage <- renderText({
       createSubmittedMessage()
   })
+  
     
 #    runWN <- reactive({
 #        if(length(input$run_wn) > 0){ 
@@ -206,32 +207,31 @@ shinyServer(function(input, output, session) {
      #attempt to pipe unbuffered WN stdout to UI
     runWN <- reactive({
       if(length(input$run_wn) > 0 && input$run_wn == 1){
-         #unlink("windninja.cfg")
-         #unlink("www/wind_vect.htm")
-         #unlink("www/Legend*")
-         #unlink("dem_*")
-         writeCfg()
-         unlink ("wnpipe")
-         system("mkfifo wnpipe")
-         #system(paste("WindNinja_cli", 
-         #       "windninja.cfg", ">> wnpipe",
-         #       collapse=""), intern=FALSE, wait=FALSE)
+        
+        withProgress(session, min=1, max=15, {
+        i = 1
+        writeCfg()
+        unlink ("wnpipe")
+        system("mkfifo wnpipe")
+    
          system(paste("NINJA_FILL_DEM_NO_DATA=YES", "/home/natalie/windninja_trunk/build/src/cli/WindNinja_cli", 
-                "windninja.cfg", ">> wnpipe",
-                collapse=""), intern=FALSE, wait=FALSE)
+                "windninja.cfg", ">> wnpipe"
+                ), intern=FALSE, wait=FALSE)
          fileName="wnpipe"
          con=fifo(fileName,open="rt",blocking=TRUE)
          linn = " "
          while ( length(linn) > 0) {
+           i = i + 1
            linn=scan(con,nlines=1,what="character", sep=" ", quiet=TRUE)
-           cat(linn,"\n"); flush.console()
+           setProgress(message = 'WindNinja is running.',
+                       detail = paste(linn, collapse=" "), value = i)
          }
          close(con)
          unlink ("wnpipe")
-         
+       })
        }
     })
-
+    
     output$wnText <- renderPrint({
          runWN()   
     })
@@ -333,7 +333,7 @@ shinyServer(function(input, output, session) {
               tags$iframe(
                   srcdoc = paste(readLines('www/wind_vect.htm'), collapse = '\n'),
                   width = "100%",
-                  height = "600px"
+                  height = "1200px"
               )
           }
       }
