@@ -17,7 +17,7 @@ textInputRow<-function (inputId, label, value = "")
 }
 
 shinyUI(fluidPage(
-
+  #plotOutput('main_plot'),
   fluidRow(
     column(4,
       h2("Test WindNinja-Dust Interface")
@@ -26,16 +26,11 @@ shinyUI(fluidPage(
       br(),
       img(src = "wn-desktop.ico", height = 40, width = 40)
     )
-   
   ),
   
   fluidRow(
     column(12, hr())
   ),
-
-  #titlePanel("Test WindNinja-Dust Interface"),
-
-  #title = 'Test WindNinja-Dust Interface',
       
   fluidRow(
     column(3, 
@@ -115,12 +110,18 @@ shinyUI(fluidPage(
   ),
   
   tags$hr(),
+
+  fluidRow(
+    column(1, htmlOutput('runButtonText')),
+    column(1, htmlOutput('runButton')),
+    column(3, textOutput("runSubmittedMessage"))# style = "color:darkblue"),
+  ),
+  hr(),
+      
+  br(),
+  
       
   fluidRow(
-    column(3, htmlOutput('runButtonText')),
-    column(1, htmlOutput('runButton')),
-      
-    column(2, textOutput("runSubmittedMessage")),# style = "color:darkblue"),
     #column(3, textOutput("runFinishedMessage")),
     column(3, htmlOutput('wnText')),
     column(1, htmlOutput('convertToGoogleMapsText')),# style = "color:darkblue")
@@ -146,7 +147,6 @@ shinyUI(fluidPage(
   ),
       
   br()
-  
   
   ))
   

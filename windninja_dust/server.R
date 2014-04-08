@@ -174,7 +174,7 @@ shinyServer(function(input, output, session) {
             else{
                 paste("Specifiy input parameters above. When you are ready to do a run, Click the run button\n",
                       "and watch here for messages indicating that the run has completed and\n",
-                      "the Google Maps output file has been created (if requested). This will take several seconds.", collapse="")
+                      "the Google Maps output file has been created (if requested). This could take a few minutes.", collapse="")
             }
         }
         else{
@@ -281,7 +281,7 @@ shinyServer(function(input, output, session) {
               vectors_sp$angle<-vectors_sp$angle - 180
               vectors_sp$angle[vectors_sp$angle < 0] <- vectors_sp$angle[vectors_sp$angle < 0] + 360
           
-              wind_vect=vectorsSP(vectors_sp, maxlength=400, zcol=c('speed','angle'))
+              wind_vect=vectorsSP(vectors_sp, maxlength=500, zcol=c('speed','angle'))
               
               #colors for wind vectors
               pal<-colorRampPalette(c("blue","green","yellow", "orange", "red"))                        
@@ -293,24 +293,25 @@ shinyServer(function(input, output, session) {
               #check that there were emissions
               v<-na.omit(as.data.frame(values(dust)))
               if(max(v) > 0.0){
-                  #wind vectors
-                  m1<-plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5),
-                           mapTypeId='HYBRID',strokeWeight=2,
-                           clickable=FALSE,openMap=FALSE, add=TRUE)
-                  
+                  #emissions
                   dust_sp<-rasterToPoints(dust, spatial=TRUE)
                   dust_sp<-as(dust_sp,'SpatialPixelsDataFrame')
-                  #emissions
-                  m2<-plotGoogleMaps(dust_sp, previousMap=m1)
+                  m1<-plotGoogleMaps(dust_sp, add=TRUE)
+                  
+                  #wind vectors
+                  m2<-plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5),
+                           mapTypeId='HYBRID',strokeWeight=2, previousMap=m1, 
+                           clickable=FALSE,openMap=FALSE)
+                       
+                  system("mv dust_sp.htm wind_vect.htm Legend* grid* www/")
               }
               else{ #if no emissions, just plot vectors
                   m1<-plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5),
                            mapTypeId='HYBRID',strokeWeight=2,
                            clickable=FALSE,openMap=FALSE)
+                  system("mv wind_vect.htm Legend* grid* www/")
               }
-                           
-              system("mv wind_vect.htm Legend* grid* www/")
-              
+
               paste("")
           }
       }
@@ -528,6 +529,15 @@ shinyServer(function(input, output, session) {
     map$clearMarkers()
     values$markers <- NULL
   })
+
+#==============================================================================
+#         raster plot on main page
+#============================================================================== 
+  output$main_plot<-renderPlot({
+    r<-raster('www/dem_220_25_712m_dust.asc')
+    plot(r) 
+  })
+
 
 #==============================================================================
 #         TESTING
