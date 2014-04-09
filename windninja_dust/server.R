@@ -47,7 +47,17 @@ shinyServer(function(input, output, session) {
 
   addRunButton <- reactive({
       if(length(input$firePerimeterFile) > 0){
-          actionButton('run_wn', img(src = "wn-icon.png", height = 40, width = 40))
+          if(length(input$run_wn) > 0){
+              if(input$run_wn == 1){
+                  paste("")
+              }
+              else{
+                  actionButton('run_wn', img(src = "wn-icon.png", height = 40, width = 40))
+              }
+          }
+          else{
+              actionButton('run_wn', img(src = "wn-icon.png", height = 40, width = 40))
+          }
       }
       else{
           paste("")
@@ -60,10 +70,17 @@ shinyServer(function(input, output, session) {
   
   addRunButtonText <- reactive({
       if(length(input$firePerimeterFile) > 0){
-          h4("Start run!")
+          if(length(input$run_wn) > 0){
+              if(input$run_wn == 1){
+                  h4("Run finished!")
+              }
+              else{
+                  h4("Start run!")
+              }
+          }
       }
       else{
-          h4("Specify fire perimeter input to get started.")
+          paste("Specify fire perimeter to get started.")
       }
   })
   
@@ -166,15 +183,14 @@ shinyServer(function(input, output, session) {
 #   Start a WindNinja run
 #-----------------------------------------------------
 
-    createSubmittedMessage <- reactive({
+    createRunMessage <- reactive({
         if(length(input$run_wn) > 0){ 
             if(input$run_wn == 1){
-                paste("WindNinja run status:", collapse="")
+                paste("")
             }
             else{
-                paste("Specifiy input parameters above. When you are ready to do a run, Click the run button\n",
-                      "and watch here for messages indicating that the run has completed and\n",
-                      "the Google Maps output file has been created (if requested). This could take a few minutes.", collapse="")
+                paste("Specifiy input parameters above. Click the run button when you're ready to do a run.\n",
+                      collapse="")
             }
         }
         else{
@@ -182,29 +198,11 @@ shinyServer(function(input, output, session) {
         }
     })
     
-    output$runSubmittedMessage <- renderText({
-      createSubmittedMessage()
+    output$runMessage <- renderText({
+      createRunMessage()
   })
   
     
-#    runWN <- reactive({
-#        if(length(input$run_wn) > 0){ 
-#            if(input$run_wn == 1){
-#                unlink("windninja.cfg")
-#                unlink("www/wind_vect.htm")
-#                unlink("www/Legend*")
-#                unlink("dem_*")
-#                writeCfg()               
-#                L<-system2("/home/natalie/windninja_trunk/build/src/cli/./WindNinja_cli", "windninja.cfg",
-#                           stdout="wnout", stderr=TRUE)
-                #L<-system2("WindNinja_cli", "windninja.cfg",
-                #           stdout=TRUE, stderr=TRUE)
-#                paste(L, sep="\n")
-#            }
-#        }
-#    })
-    
-     #attempt to pipe unbuffered WN stdout to UI
     runWN <- reactive({
       if(length(input$run_wn) > 0 && input$run_wn == 1){
         
@@ -266,6 +264,11 @@ shinyServer(function(input, output, session) {
       #isolate({
       if(length(input$run_wn) > 0){ 
           if(input$run_wn==1 && input$outGoogleMaps == 1){
+              i = 1
+              withProgress(session, min=1, max=10, {
+              
+              setProgress(message = 'Writing Google Maps output.',
+                       detail = "This may take a few minutes...", value = 2)
           
               spdFiles<-system("ls -t | grep vel.asc", intern = TRUE)
               spd<-raster(spdFiles[1]) # get the most recent one
@@ -275,13 +278,19 @@ shinyServer(function(input, output, session) {
 
               vectors<-brick(spd, ang)
               names(vectors)<-c("speed", "angle")
+              
+              setProgress(value = 3)
 
               vectors_sp<-rasterToPoints(vectors, spatial=TRUE)
+              
+              setProgress(value = 4)
           
               vectors_sp$angle<-vectors_sp$angle - 180
               vectors_sp$angle[vectors_sp$angle < 0] <- vectors_sp$angle[vectors_sp$angle < 0] + 360
           
               wind_vect=vectorsSP(vectors_sp, maxlength=500, zcol=c('speed','angle'))
+              
+              setProgress(value = 5)
               
               #colors for wind vectors
               pal<-colorRampPalette(c("blue","green","yellow", "orange", "red"))                        
@@ -290,18 +299,25 @@ shinyServer(function(input, output, session) {
               dustFiles<-system("ls -t | grep dust.asc", intern = TRUE)
               dust<-raster(dustFiles[1]) # get the most recent one
               
+              setProgress(value = 6)
+              
               #check that there were emissions
               v<-na.omit(as.data.frame(values(dust)))
+              
+              setProgress(value = 7)
+              
               if(max(v) > 0.0){
                   #emissions
                   dust_sp<-rasterToPoints(dust, spatial=TRUE)
                   dust_sp<-as(dust_sp,'SpatialPixelsDataFrame')
-                  m1<-plotGoogleMaps(dust_sp, add=TRUE)
+                  m1<-plotGoogleMaps(dust_sp, add=TRUE, colPalette=pal(5))
+                  setProgress(value = 8)
                   
                   #wind vectors
                   m2<-plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5),
                            mapTypeId='HYBRID',strokeWeight=2, previousMap=m1, 
                            clickable=FALSE,openMap=FALSE)
+                  setProgress(value = 9)
                        
                   system("mv dust_sp.htm wind_vect.htm Legend* grid* www/")
               }
@@ -309,21 +325,21 @@ shinyServer(function(input, output, session) {
                   m1<-plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5),
                            mapTypeId='HYBRID',strokeWeight=2,
                            clickable=FALSE,openMap=FALSE)
+                  setProgress(value = 9)
                   system("mv wind_vect.htm Legend* grid* www/")
               }
 
               paste("")
+          
+          })
           }
+        
       }
       else{
           paste("")
       }
       #isolate})
   })
-  
-  output$convertToGoogleMapsText <- renderUI({
-      convertToGoogleMaps() #writes the Google Maps File 
-    })
 
   displayMap <- reactive({
       if(length(input$run_wn) > 0 ){   
@@ -340,6 +356,7 @@ shinyServer(function(input, output, session) {
   })
 
   output$mymap <- renderUI({
+      convertToGoogleMaps() #writes the Google Maps File 
       displayMap()
   })
 

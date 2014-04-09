@@ -18,6 +18,7 @@ textInputRow<-function (inputId, label, value = "")
 }
 
 shinyUI(fluidPage(
+#shinyUI(fluidPage(theme = "bootstrap.css",
   #plotOutput('main_plot'),
   
   fluidRow(
@@ -102,7 +103,9 @@ shinyUI(fluidPage(
     column(2,
       wellPanel(
       h4('3. Output'),
-      h5("Choose output format(s):"),
+      paste("Choose output format(s):"),
+      br(),
+      br(),
       checkboxInput("outGoogleMaps", "Google Maps", TRUE),
       helpText(em("Viewable on your smart phone")), 
       checkboxInput("outGoogleEarth", "Google Earth", FALSE), 
@@ -111,12 +114,10 @@ shinyUI(fluidPage(
     )
   ),
   
-  tags$hr(),
-
   fluidRow(
-    column(1, htmlOutput('runButtonText')),
+    column(2, htmlOutput('runButtonText')),
     column(1, htmlOutput('runButton')),
-    column(3, textOutput("runSubmittedMessage")),
+    column(3, textOutput("runMessage")),
     progressInit(),
     column(3, htmlOutput('wnText'))
   ),
@@ -126,8 +127,6 @@ shinyUI(fluidPage(
   
       
   fluidRow(
-    column(1, htmlOutput('convertToGoogleMapsText')),# style = "color:darkblue")
-    tags$br(),
     column(2, htmlOutput('downloadButton'))
   ),
   
