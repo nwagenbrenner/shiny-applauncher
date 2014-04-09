@@ -186,7 +186,7 @@ shinyServer(function(input, output, session) {
     createRunMessage <- reactive({
         if(length(input$run_wn) > 0){ 
             if(input$run_wn == 1){
-                paste("")
+                paste("Click the refresh button in your browser to do another run.\n")
             }
             else{
                 paste("Specifiy input parameters above. Click the run button when you're ready to do a run.\n",
