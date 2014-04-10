@@ -1,6 +1,6 @@
 library(leaflet)
 library(ShinyDash)
-#library(shinyIncubator)
+library(shinyIncubator)
 library(shiny)
 #install_github('ShinyDash', 'trestletech')
 #install_github('leaflet-shiny', 'jcheng5')
@@ -163,10 +163,10 @@ shinyUI(fluidPage(
       column(2, htmlOutput('runButton')),
       #column(2, actionButton('run_wn', img(src = "wn-icon.png", height = 40, width = 40))),
       
-      column(8, textOutput("runSubmittedMessage")),# style = "color:darkblue"),
-      #col(8, textOutput("runFinishedMessage"), style = "color:blue"),
+      column(8, textOutput("runMessage")),
+      progressInit(),
       column(4, htmlOutput('wnText'), style = "color:darkblue"),
-      column(4, htmlOutput('convertToGoogleMapsText')),# style = "color:darkblue")
+      column(4, htmlOutput('convertToGoogleMapsText')),
       br(),
       column(8, htmlOutput('downloadButton'))
       ),
