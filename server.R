@@ -62,7 +62,7 @@ shinyServer(function(input, output, session) {
               if(input$shinyApp == "windninja"){
                   makeNinja()
               }
-              if(input$shinyApp == "windninja_dust"){
+              else if(input$shinyApp == "windninja_dust"){
                   makeNinjaDust()
               }
               else if(input$shinyApp == "fvs"){
