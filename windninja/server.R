@@ -1,3 +1,7 @@
+#================================= 
+#            WindNinja
+#=================================
+
 library(shiny)
 library(leaflet)
 library(maps)
@@ -9,6 +13,7 @@ library(shinyIncubator)
 options(shiny.maxRequestSize=30*1024^2)
 
 demFile <- NULL
+forecastDir <- ""
 
 # From a future version of Shiny
 bindEvent <- function(eventExpr, callback, env=parent.frame(), quoted=FALSE) {
@@ -44,7 +49,7 @@ shinyServer(function(input, output, session) {
 #----------------------------------------------------- 
 
   addRunButton <- reactive({
-      if(input$elevation == "boundingBox" || length(input$demFile) > 0){
+      if(input$elevation == "boundingBox" || input$elevation == "centerLatLon" || length(input$demFile) > 0){
           if(length(input$run_wn) > 0){
               if(input$run_wn == 1){
                   paste("")
@@ -96,13 +101,25 @@ shinyServer(function(input, output, session) {
       cat("num_threads = 2\n",file=cfg)
       cat(paste("vegetation = ", input$vegetation, "\n", collapse=""), file=cfg, append=TRUE)
 
-      if(input$elevation == "boundingBox"){
+      if(input$elevation == "centerLatLon"){
+          cat(paste("fetch_elevation = dem.tif\n"), file=cfg, append=TRUE)
+          cat(paste("elevation_source = us_srtm\n"), file=cfg, append=TRUE)
+          cat(paste("x_center = ", input$centerLon, "\n", collapse=""),file=cfg, append=TRUE)
+          cat(paste("y_center = ", input$centerLat, "\n", collapse=""),file=cfg, append=TRUE)
+          cat(paste("x_buffer = 50\n"),file=cfg, append=TRUE)
+          cat(paste("y_buffer = 50\n"),file=cfg, append=TRUE)
+          cat(paste("buffer_units = kilometers\n"),file=cfg, append=TRUE)
+          demFile <<- "dem.tif"
+      }
+ 
+      else if(input$elevation == "boundingBox"){
           cat(paste("fetch_elevation = dem.tif\n"), file=cfg, append=TRUE)
           cat(paste("elevation_source = us_srtm\n"), file=cfg, append=TRUE)
           cat(paste("north = ", input$northExtent, "\n", collapse=""),file=cfg, append=TRUE)
           cat(paste("south = ", input$southExtent, "\n", collapse=""),file=cfg, append=TRUE)
           cat(paste("east = ", input$eastExtent, "\n", collapse=""),file=cfg, append=TRUE)
           cat(paste("west = ", input$westExtent, "\n", collapse=""),file=cfg, append=TRUE)
+          demFile <<- "dem.tif"
       }
 
       else if(input$elevation == "uploadDem"){
@@ -114,7 +131,7 @@ shinyServer(function(input, output, session) {
           else{
               system(paste("mv ",  input$demFile$datapath, "dem.asc"))
           }
-          demFile = "dem.asc"
+          demFile <<- "dem.asc"
           cat(paste("elevation_file = ", demFile, "\n"), file=cfg, append=TRUE)
       }
       cat(paste("time_zone = auto-detect\n", collapse=""), file=cfg, append=TRUE)
@@ -127,16 +144,23 @@ shinyServer(function(input, output, session) {
           cat(paste("input_speed_units = ", input$unitsInputSpeed, "\n", collapse=""), file=cfg, append=TRUE)
           cat(paste("input_direction = ", input$inputDirection, "\n", collapse=""), file=cfg, append=TRUE)
       }
+      else if(input$initializationMethod == "wxModelInitialization"){
+          cat(paste("wx_model_type = ", input$wxModelType, "\n", collapse=""), file=cfg, append=TRUE)
+          cat(paste("forecast_duration = ", input$forecastDuration, "\n", collapse=""), file=cfg, append=TRUE)
+          forecastDir <<- paste0(input$wxModelType,"-", demFile)
+      }
       if(input$diurnalInput == TRUE){
           cat("diurnal_winds = true\n", file=cfg, append=TRUE)
-          cat(paste("uni_air_temp = ", input$inputAirTemp, "\n", collapse=""), file=cfg, append=TRUE)
-          cat(paste("air_temp_units = ", input$unitsInputAirTemp, "\n", collapse=""), file=cfg, append=TRUE)
+          if(input$initializationMethod != "wxModelInitialization"){
+              cat(paste("uni_air_temp = ", input$inputAirTemp, "\n", collapse=""), file=cfg, append=TRUE)
+              cat(paste("air_temp_units = ", input$unitsInputAirTemp, "\n", collapse=""), file=cfg, append=TRUE)
+          }
       }
       if(input$stabilityInput == TRUE){
           cat("non_neutral_stability = true\n", file=cfg, append=TRUE)
           
       }
-      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
+      if((input$diurnalInput == TRUE || input$stabilityInput == TRUE) & input$initializationMethod != "wxModelInitialization"){
           cat(paste("uni_cloud_cover = ", input$inputCloudCover, "\n", collapse=""), file=cfg, append=TRUE)
           cat(paste("cloud_cover_units = ", input$unitsInputCloudCover, "\n", collapse=""), file=cfg, append=TRUE)
           cat(paste("year = ", input$year, "\n", collapse=""), file=cfg, append=TRUE)
@@ -196,7 +220,7 @@ shinyServer(function(input, output, session) {
         unlink ("wnpipe")
         system("mkfifo wnpipe")
     
-         system(paste("NINJA_FILL_DEM_NO_DATA=YES", "/home/natalie/windninja_trunk/build/src/cli/WindNinja_cli", 
+         system(paste("NINJA_FILL_DEM_NO_DATA=YES", "/home/natalie/src/windninja/build/src/cli/WindNinja_cli", 
                 "windninja.cfg", ">> wnpipe"
                 ), intern=FALSE, wait=FALSE)
          fileName="wnpipe"
@@ -287,10 +311,23 @@ output$cleanupText<-renderUI({
               setProgress(message = 'Writing Google Maps output.',
                        detail = "This may take a few minutes...", value = 2)
                        
-              spdFiles<-system("ls -t | grep vel.asc", intern = TRUE)
+              if(input$initializationMethod == "wxModelInitialization"){
+                  
+                  dir<-system(paste("ls -t", forecastDir), intern = TRUE)
+                  dir<-paste0(forecastDir, "/", dir[1])
+                  
+                  spdFiles<-system(paste("ls -t", dir, " | grep vel.asc"), intern = TRUE)
+                  angFiles<-system(paste("ls -t", dir, " | grep ang.asc"), intern = TRUE)
+
+                  spdFiles<-paste0(dir, "/", spdFiles[1])
+                  angFiles<-paste0(dir, "/", angFiles[1])
+              }
+              else{
+                  spdFiles<-system("ls -t | grep vel.asc", intern = TRUE)
+                  angFiles<-system("ls -t | grep ang.asc", intern = TRUE)
+              }
+
               spd<-raster(spdFiles[1]) # get the most recent one
-          
-              angFiles<-system("ls -t | grep ang.asc", intern = TRUE)
               ang<-raster(angFiles[1]) # get the most recent one
               
               setProgress(value = 3)
@@ -309,13 +346,13 @@ output$cleanupText<-renderUI({
               
               setProgress(value = 8)
           
-              wind_vect=vectorsSP(vectors_sp, maxlength=200, zcol=c('speed','angle'))
+              wind_vect=vectorsSP(vectors_sp, maxlength=400, zcol=c('speed','angle'))
               
               setProgress(value = 10)
 
               pal<-colorRampPalette(c("blue","green","yellow", "orange", "red"))
               m=plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5),
-                           mapTypeId='HYBRID',strokeWeight=2,
+                           mapTypeId='TERRAIN',strokeWeight=2,
                            clickable=FALSE,openMap=FALSE)
                            
               setProgress(value = 13)
@@ -392,6 +429,16 @@ output$cleanupText<-renderUI({
           textInputRow("westExtent", "West:", "-116.9517")
       }
   })
+  createLatbox <- reactive({
+      if(input$elevation == "centerLatLon"){
+          textInputRow("centerLat", "Lat:", "46.7856")
+      }
+  })
+  createLonbox <- reactive({
+      if(input$elevation == "centerLatLon"){
+          textInputRow("centerLon", "Lon:", "-116.9517")
+      }
+  })
   createDemUpload <- reactive({
       if(input$elevation == "uploadDem"){
           fileInput("demFile", "Upload DEM:", multiple=TRUE, accept=NULL)
@@ -415,6 +462,12 @@ output$cleanupText<-renderUI({
   })
   output$wField <- renderUI({
       createWbox()
+  })
+  output$latField <- renderUI({
+      createLatbox()
+  })
+  output$lonField <- renderUI({
+      createLonbox()
   })
   output$demUploader <- renderUI({
       createDemUpload()
@@ -487,6 +540,30 @@ output$cleanupText<-renderUI({
       createUnitsOutputHeightButtons()
   })
 
+#-------------------------------------------------------------
+#   create input wind fields for weather model runs
+#-------------------------------------------------------------
+  createModelTypeInput <- reactive({
+      if(input$initializationMethod == "wxModelInitialization"){
+          selectInput("wxModelType", "Weather Model:",
+                list("NAM" = "NCEP-NAM-12km-SURFACE",
+                     "NAM-Alaska" = "NCEP-NAM-Alaska-11km-SURFACE", 
+                     "GFS" = "NCEP-GFS-GLOBAL-0_5deg-SURFACE",
+                     "RAP" = "NCEP-RAP-13km-SURFACE",
+                     "NDFD" = "NCEP-NDFD-5km"))
+      }
+  })
+  createDuration <- reactive({
+      if(input$initializationMethod == "wxModelInitialization"){
+          textInputRow("forecastDuration", "Forecast duration:", "6")
+      }
+  })
+  output$forecastDuration <- renderUI({
+      createDuration()
+  })
+  output$inputWxModelType <- renderUI({
+      createModelTypeInput()
+  })
 #-------------------------------------------------------------
 #   create input option boxes for diurnal and stability
 #-------------------------------------------------------------

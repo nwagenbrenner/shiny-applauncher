@@ -1,7 +1,12 @@
+#================================= 
+#            WindNinja
+#=================================
+
 library(leaflet)
 library(ShinyDash)
 library(shinyIncubator)
 library(shiny)
+#install_github('ShinyDash', 'trestletech')
 #install_github('ShinyDash', 'trestletech')
 #install_github('leaflet-shiny', 'jcheng5')
 
@@ -35,16 +40,16 @@ shinyUI(fluidPage(
     tags$head(tags$link(rel='stylesheet', type='text/css', href='styles.css'), 
            tags$style("label.radio { display: inline-block; }", ".radio input[type=\"radio\"] { float: none; }")
              ),
-    leafletMap(
-               "map", "100%", 400,
+    #leafletMap(
+    #           "map", "100%", 400,
                #initialTileLayer = "http://{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
                #initialTileLayerAttribution = HTML('Maps by <a href="http://www.mapbox.com/">Mapbox</a>'),
-               options=list(
-               center = c(40.45, -110.85),
-               zoom = 5,
-               maxBounds = list(list(17, -180), list(59, 180))
-               )
-    ),
+    #           options=list(
+    #           center = c(40.45, -110.85),
+    #           zoom = 5,
+    #           maxBounds = list(list(17, -180), list(59, 180))
+    #           )
+    #),
   
 
   tags$div(
@@ -62,11 +67,15 @@ shinyUI(fluidPage(
         h4('1. Input'),
         selectInput("elevation", "Elevation input:",
                 list(#"Select from map" = "swoopMap",
-                     "Upload DEM" = "uploadDem", 
+                     "Upload DEM" = "uploadDem",
+                     "Enter center coordinates" = "centerLatLon", 
                      "Enter bounding box coordinates" = "boundingBox")),
 
         div(style="width:220px", htmlOutput("demUploader")),
         
+        div(style="display:inline-table", htmlOutput("latField")),
+        div(style="display:inline-table", htmlOutput("lonField")),
+        br(),
         div(style="display:inline-table", htmlOutput("nField")),
         div(style="display:inline-table", htmlOutput("sField")),
         br(),
@@ -77,12 +86,18 @@ shinyUI(fluidPage(
         br(),
     
         selectInput("initializationMethod", "Simulation type:",
-                list("Domain average" = "domainAverageInitialization")), 
+                list("Domain average" = "domainAverageInitialization",
                      #"Point initialization" = "pointInitialization",
-                     #"Weather model" = "wxModelInitialization")),
+                     "Weather model" = "wxModelInitialization")),
         
         br(),
         
+        div(style="display:inline-table; width: 275px", htmlOutput("inputWxModelType")),
+        br(),
+        div(style="display:inline-table", htmlOutput("forecastDuration")),
+
+        br(),
+
         div(style="display:inline-table", htmlOutput("inputHeightField")),
         div(class="input-mini",style="display:inline-table; width: 70px",htmlOutput("unitsInputHeightField")),
         
@@ -168,7 +183,8 @@ shinyUI(fluidPage(
       column(4, htmlOutput('wnText'), style = "color:darkblue"),
       column(4, htmlOutput('convertToGoogleMapsText')),
       br(),
-      column(8, htmlOutput('downloadButton'))
+      div(style="display:inline-table", htmlOutput('downloadButton'))
+      #column(8, htmlOutput('downloadButton'))
       ),
       
       br(),
