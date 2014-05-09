@@ -402,8 +402,9 @@ output$cleanupText<-renderUI({
           }
       }
       if(length(list.files(path="www/", pattern=".htm") != 0)){
+         f<-list.files(path="www/", pattern=".htm")[1]
          tags$iframe(
-             srcdoc = paste(readLines(paste0('www/',input$windVectFile)), collapse = '\n'),
+             srcdoc = paste(readLines(paste0('www/',f)), collapse = '\n'),
              width = "100%",
              height = "600px"
         )   
@@ -419,11 +420,11 @@ output$cleanupText<-renderUI({
 #-------------------------------------------------------------
 createMapSelection <- reactive({
    if(length(input$run_wn) > 0 || length(list.files(path="www/", pattern=".htm") != 0)){ 
-      if(input$run_wn==1 && input$outGoogleMaps == 1){  
+      #if(input$run_wn==1 && length(list.files(path="www/", pattern=".htm") != 0)){  
           selectInput("windVectFile", "Select forecast to view:",
                       selected=(list.files(path="www/", pattern=".htm")[1]),
                       c=list.files(path="www/", pattern=".htm"))
-      }                
+      #}                
     }
 })
 output$mapSelection <- renderUI({
