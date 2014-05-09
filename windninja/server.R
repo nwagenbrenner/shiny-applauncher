@@ -10,7 +10,7 @@ library(plotGoogleMaps)
 library(shinyIncubator)
 
 #default max upload size is 5MB, increase to 30.
-options(shiny.maxRequestSize=30*1024^2)
+options(shiny.maxRequestSize=50*1024^2)
 
 demFile <- NULL
 forecastDir <- ""
@@ -72,7 +72,7 @@ shinyServer(function(input, output, session) {
   })
   
   addRunButtonText <- reactive({
-      if(input$elevation == "boundingBox" || length(input$demFile) > 0){
+      if(input$elevation == "boundingBox" || input$elevation == "centerLatLon" || length(input$demFile) > 0){
           if(length(input$run_wn) > 0){
               if(input$run_wn == 1){
                   h4("Run finished!")
@@ -106,9 +106,9 @@ shinyServer(function(input, output, session) {
           cat(paste("elevation_source = us_srtm\n"), file=cfg, append=TRUE)
           cat(paste("x_center = ", input$centerLon, "\n", collapse=""),file=cfg, append=TRUE)
           cat(paste("y_center = ", input$centerLat, "\n", collapse=""),file=cfg, append=TRUE)
-          cat(paste("x_buffer = 50\n"),file=cfg, append=TRUE)
-          cat(paste("y_buffer = 50\n"),file=cfg, append=TRUE)
-          cat(paste("buffer_units = kilometers\n"),file=cfg, append=TRUE)
+          cat(paste("x_buffer = ", input$xBuffer, "\n", collapse=""),file=cfg, append=TRUE)
+          cat(paste("y_buffer = ", input$yBuffer, "\n", collapse=""),file=cfg, append=TRUE)
+          cat(paste("buffer_units = ", input$unitsBuffer, "\n", collapse=""),file=cfg, append=TRUE)
           demFile <<- "dem.tif"
       }
  
@@ -197,8 +197,8 @@ shinyServer(function(input, output, session) {
                 paste("Click the refresh button in your browser to do another run.\n")
             }
             else{
-                paste("Specifiy input parameters above. Click the run button when you're ready to do a run.\n",
-                      collapse="")
+                #paste("Specifiy input parameters above. Click the run button when you're ready to do a run.\n",
+                #      collapse="")
             }
         }
         else{
@@ -353,11 +353,11 @@ output$cleanupText<-renderUI({
               pal<-colorRampPalette(c("blue","green","yellow", "orange", "red"))
               m=plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5),
                            mapTypeId='TERRAIN',strokeWeight=2,
-                           clickable=FALSE,openMap=FALSE)
+                           clickable=FALSE,openMap=TRUE)
                            
               setProgress(value = 13)
                            
-              system("mv wind_vect.htm Legend* www/")
+              #system("mv wind_vect.htm Legend* www/")
               
               setProgress(value = 14)
               
@@ -439,6 +439,23 @@ output$cleanupText<-renderUI({
           textInputRow("centerLon", "Lon:", "-116.9517")
       }
   })
+  createXbuffer <- reactive({
+      if(input$elevation == "centerLatLon"){
+          textInputRow("xBuffer", "x Buffer:", "10")
+      }
+  })
+  createYbuffer <- reactive({
+      if(input$elevation == "centerLatLon"){
+          textInputRow("yBuffer", "y Buffer:", "10")
+      }
+  })
+  createUnitsBuffer <- reactive({
+      if(input$elevation == "centerLatLon"){
+          selectInput("unitsBuffer", "Buffer units:",
+                list("mi" = "miles", 
+                     "km" = "kilometers"))
+      }
+  })
   createDemUpload <- reactive({
       if(input$elevation == "uploadDem"){
           fileInput("demFile", "Upload DEM:", multiple=TRUE, accept=NULL)
@@ -468,6 +485,15 @@ output$cleanupText<-renderUI({
   })
   output$lonField <- renderUI({
       createLonbox()
+  })
+  output$xBufferField <- renderUI({
+      createXbuffer()
+  })
+  output$yBufferField <- renderUI({
+      createYbuffer()
+  })
+  output$bufferUnits <- renderUI({
+      createUnitsBuffer()
   })
   output$demUploader <- renderUI({
       createDemUpload()
@@ -555,7 +581,7 @@ output$cleanupText<-renderUI({
   })
   createDuration <- reactive({
       if(input$initializationMethod == "wxModelInitialization"){
-          textInputRow("forecastDuration", "Forecast duration:", "6")
+          textInputRow("forecastDuration", "Forecast duration (hrs):", "6")
       }
   })
   output$forecastDuration <- renderUI({

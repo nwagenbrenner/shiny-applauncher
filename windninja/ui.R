@@ -56,18 +56,26 @@ shinyUI(fluidPage(
       class = "container",
     fluidRow(
     column(5, 
-          h2('Test WindNinja Interface')  
+          h2('Test WindNinja Interface')   
     )
     ),
+    fluidRow(
+      column(12, 
+          h4('For testing until Negative Nancy is brave enough to relase the highly anticipated \'WindNinja Inyourface\'')
+      )
+    ),  
 
     hr(),
 
+   fluidRow(
+      column(12,
+        h3('1. Input')
+      )
+    ),
     fluidRow(
       column(3,
-        h4('1. Input'),
         selectInput("elevation", "Elevation input:",
-                list(#"Select from map" = "swoopMap",
-                     "Upload DEM" = "uploadDem",
+                list("Upload DEM" = "uploadDem",
                      "Enter center coordinates" = "centerLatLon", 
                      "Enter bounding box coordinates" = "boundingBox")),
 
@@ -76,6 +84,10 @@ shinyUI(fluidPage(
         div(style="display:inline-table", htmlOutput("latField")),
         div(style="display:inline-table", htmlOutput("lonField")),
         br(),
+        div(style="display:inline-table", htmlOutput("xBufferField")),
+        div(style="display:inline-table", htmlOutput("yBufferField")),
+        div(style="display:inline-table; width: 80px", htmlOutput("bufferUnits")),
+        br(),
         div(style="display:inline-table", htmlOutput("nField")),
         div(style="display:inline-table", htmlOutput("sField")),
         br(),
@@ -83,12 +95,15 @@ shinyUI(fluidPage(
         div(style="display:inline-table", htmlOutput("eField")),
         
         br(),
-        br(),
+        br()
+
+        ),
+        column(3, offset = 1,
     
         selectInput("initializationMethod", "Simulation type:",
-                list("Domain average" = "domainAverageInitialization",
-                     #"Point initialization" = "pointInitialization",
-                     "Weather model" = "wxModelInitialization")),
+                list(#"Point initialization" = "pointInitialization",
+                     "Weather model" = "wxModelInitialization",
+                     "Domain average" = "domainAverageInitialization")),
         
         br(),
         
@@ -108,11 +123,14 @@ shinyUI(fluidPage(
         
         br(),
         
-        htmlOutput("inputDirectionField"),
+        htmlOutput("inputDirectionField")
+
+        ),
+        column(3, offset = 1,
 
         selectInput("vegetation", "Vegetation type:",
                 list("Grass" = "grass", 
-                     "Shrubs" = "shrubs",
+                     "Brush" = "brush",
                      "Trees" = "trees")),
         selectInput("meshChoice", "Mesh choice:",
                 list("Coarse" = "coarse",
@@ -123,14 +141,15 @@ shinyUI(fluidPage(
                
         div(style = "display:inline-table", htmlOutput("outputHeightField")),
         div(style = "display:inline-table; width: 70px;",htmlOutput("unitsOutputHeightField"))
-      ),
-     
-      column(3, offset = 1,
-        h4('2. Additional options'),
-        #selectInput("timeZone", "Time zone:",
-        #        c(t$ID[1:length(t$ID)]),
-        #        t$ID[65]
-        #        ),
+      )
+    ),
+    hr(),
+    fluidRow(
+      column(3, h3('2. Additional options'))
+    ),
+
+    fluidRow( 
+      column(3,
 
         checkboxInput("diurnalInput", "Use diurnal wind", FALSE),
         checkboxInput("stabilityInput", "Use non-neutral stability", FALSE),
@@ -139,7 +158,7 @@ shinyUI(fluidPage(
         
         div(style="display:inline-table", htmlOutput("yearField")),
         div(style="display:inline-table", htmlOutput("monthField")),
-        #tags$br(),
+
         div(style="display:inline-table", htmlOutput("dayField")),
         div(style="display:inline-table", htmlOutput("hourField")),
         div(style="display:inline-table", htmlOutput("minuteField")),
@@ -153,14 +172,17 @@ shinyUI(fluidPage(
         br(),
 
         div(style="display:inline-table", htmlOutput("inputCloudCoverField")),
-        div(class="input-mini",style="display:inline-table; width: 90px;",htmlOutput("unitsInputCloudCoverField")),
-        
-        br()
-        
+        div(class="input-mini",style="display:inline-table; width: 90px;",htmlOutput("unitsInputCloudCoverField"))
+ 
+      )
+    ),
+    hr(),
+    fluidRow(
+      column(3, h3('3. Output'))
+    ),
 
-      ),
-      column(3, offset=1,
-        h4('3. Output'),
+    fluidRow(
+      column(3,
         h5("Choose output format(s):"),
         checkboxInput("outGoogleMaps", "Google Maps", TRUE),
         helpText(em("Viewable on your smart phone")), 
@@ -170,31 +192,42 @@ shinyUI(fluidPage(
         checkboxInput("outVtk", "VTK Files", FALSE)
       )
       ),
-      
       hr(),
-      
+
       fluidRow(
-      column(1, htmlOutput('runButtonText')),
-      column(2, htmlOutput('runButton')),
-      #column(2, actionButton('run_wn', img(src = "wn-icon.png", height = 40, width = 40))),
-      
-      column(8, textOutput("runMessage")),
-      progressInit(),
-      column(4, htmlOutput('wnText'), style = "color:darkblue"),
-      column(4, htmlOutput('convertToGoogleMapsText')),
-      br(),
-      div(style="display:inline-table", htmlOutput('downloadButton'))
-      #column(8, htmlOutput('downloadButton'))
+        column(3, h3('4. Start a run'))
+      ),
+      fluidRow(
+        column(8, textOutput("runMessage"))
+      ),
+      fluidRow(
+        column(4, htmlOutput('runButtonText'))
+      ),
+      fluidRow(
+        column(3, htmlOutput('runButton'))
+        #column(2, actionButton('run_wn', img(src = "wn-icon.png", height = 40, width = 40))),
+      ),
+      fluidRow(
+        progressInit(),
+        column(4, htmlOutput('wnText'), style = "color:darkblue"),
+        column(4, htmlOutput('convertToGoogleMapsText')),
+        br()
+      ),
+      fluidRow(
+        column(8,
+        div(style="display:inline-table", htmlOutput('downloadButton'))
+        #column(8, htmlOutput('downloadButton'))
+        )
       ),
       
       br(),
       
-      fluidRow(
-      column(12,
-          br(),
-          uiOutput('mymap')
-      )
-      ),
+#      fluidRow(
+#      column(12,
+#          br(),
+#          uiOutput('mymap')
+#      )
+#      ),
       
       br(),
 
@@ -203,7 +236,9 @@ shinyUI(fluidPage(
       ),
 
       fluidRow(
-         column(3, htmlOutput('cleanupText'))
+         column(2, 
+         htmlOutput('cleanupText')
+         )
       ),
 
       hr(),
