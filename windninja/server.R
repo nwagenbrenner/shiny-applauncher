@@ -8,12 +8,14 @@ library(maps)
 library(raster)
 library(plotGoogleMaps)
 library(shinyIncubator)
+library(stringr)
 
 #default max upload size is 5MB, increase to 30.
 options(shiny.maxRequestSize=50*1024^2)
 
 demFile <- NULL
 forecastDir <- ""
+gSpdFiles <- NULL
 
 # From a future version of Shiny
 bindEvent <- function(eventExpr, callback, env=parent.frame(), quoted=FALSE) {
@@ -319,47 +321,58 @@ output$cleanupText<-renderUI({
                   spdFiles<-system(paste("ls -t", dir, " | grep vel.asc"), intern = TRUE)
                   angFiles<-system(paste("ls -t", dir, " | grep ang.asc"), intern = TRUE)
 
-                  spdFiles<-paste0(dir, "/", spdFiles[1])
-                  angFiles<-paste0(dir, "/", angFiles[1])
+                  gSpdFiles<<-spdFiles
+
+                  spdFiles<-paste0(dir, "/", spdFiles)
+                  angFiles<-paste0(dir, "/", angFiles)
               }
               else{
                   spdFiles<-system("ls -t | grep vel.asc", intern = TRUE)
                   angFiles<-system("ls -t | grep ang.asc", intern = TRUE)
+
+                  spdFiles<-(spdFiles[1]) # get the most recent one
+                  angFiles<-(angFiles[1]) # get the most recent one
               }
-
-              spd<-raster(spdFiles[1]) # get the most recent one
-              ang<-raster(angFiles[1]) # get the most recent one
               
-              setProgress(value = 3)
-
-              vectors<-brick(spd, ang)
-              names(vectors)<-c("speed", "angle")
+              for(i in 1:length(spdFiles)){
+                  spd<-raster(spdFiles[i])
+                  ang<-raster(angFiles[i])
               
-              setProgress(value = 5)
+                  setProgress(value = 3 + i)
 
-              vectors_sp<-rasterToPoints(vectors, spatial=TRUE)
+                  vectors<-brick(spd, ang)
+                  names(vectors)<-c("speed", "angle")
+
+                  vectors_sp<-rasterToPoints(vectors, spatial=TRUE)
               
-              setProgress(value = 6)
+                  #setProgress(value = 6)
           
-              vectors_sp$angle<-vectors_sp$angle - 180
-              vectors_sp$angle[vectors_sp$angle < 0] <- vectors_sp$angle[vectors_sp$angle < 0] + 360
+                  vectors_sp$angle<-vectors_sp$angle - 180
+                  vectors_sp$angle[vectors_sp$angle < 0] <- vectors_sp$angle[vectors_sp$angle < 0] + 360
               
-              setProgress(value = 8)
-          
-              wind_vect=vectorsSP(vectors_sp, maxlength=400, zcol=c('speed','angle'))
+                  #setProgress(value = 8)
               
-              setProgress(value = 10)
+                  t<-str_extract(spdFiles[1], "_[1-9]?[1-9][1-9]m_")
+                  maxlength <- as.numeric(substr(t, 2,(nchar(t)-2)))
 
-              pal<-colorRampPalette(c("blue","green","yellow", "orange", "red"))
-              m=plotGoogleMaps(wind_vect, zcol='speed', colPalette=pal(5),
+                  wind_vect=vectorsSP(vectors_sp, maxlength=maxlength, zcol=c('speed','angle'))
+              
+                  #setProgress(value = 10)
+
+                  #fname<-paste0(substr(spdFiles[i], 5, (nchar(spdFiles[i]) - 8)), ".htm")
+                  fname<-paste0("wind_vect_", i, ".htm")
+
+                  pal<-colorRampPalette(c("blue","green","yellow", "orange", "red"))
+                  m=plotGoogleMaps(wind_vect, filename=fname, zcol='speed', colPalette=pal(5),
                            mapTypeId='TERRAIN',strokeWeight=2,
-                           clickable=FALSE,openMap=TRUE)
+                           clickable=FALSE,openMap=FALSE)
                            
-              setProgress(value = 13)
+                  #setProgress(value = 13)
                            
-              #system("mv wind_vect.htm Legend* www/")
+                  system(paste("mv", fname, "Legend* www/"))
               
-              setProgress(value = 14)
+                  #setProgress(value = 14)
+              }
               
               paste("")
               
@@ -380,17 +393,17 @@ output$cleanupText<-renderUI({
       if(length(input$run_wn) > 0 ){   
           if(input$run_wn==1 && 
              input$outGoogleMaps == 1 && 
-             "wind_vect.htm" %in% dir("www")){
+             length(list.files(path="www/", pattern=".htm") != 0)){
               tags$iframe(
-                  srcdoc = paste(readLines('www/wind_vect.htm'), collapse = '\n'),
+                  srcdoc = paste(readLines(paste0('www/',input$windVectFile)), collapse = '\n'),
                   width = "100%",
                   height = "900px"
               )
           }
       }
-      if("wind_vect.htm" %in% dir("www")){
+      if(length(list.files(path="www/", pattern=".htm") != 0)){
          tags$iframe(
-             srcdoc = paste(readLines('www/wind_vect.htm'), collapse = '\n'),
+             srcdoc = paste(readLines(paste0('www/',input$windVectFile)), collapse = '\n'),
              width = "100%",
              height = "600px"
         )   
@@ -399,6 +412,22 @@ output$cleanupText<-renderUI({
 
   output$mymap <- renderUI({
       displayMap()
+  })
+
+#-------------------------------------------------------------
+#   create map viewing options for wx model runs
+#-------------------------------------------------------------
+createMapSelection <- reactive({
+   if(length(input$run_wn) > 0 || length(list.files(path="www/", pattern=".htm") != 0)){ 
+      if(input$run_wn==1 && input$outGoogleMaps == 1){  
+          selectInput("windVectFile", "Select forecast to view:",
+                      selected=(list.files(path="www/", pattern=".htm")[1]),
+                      c=list.files(path="www/", pattern=".htm"))
+      }                
+    }
+})
+output$mapSelection <- renderUI({
+      createMapSelection()
   })
 
 #-------------------------------------------------------------

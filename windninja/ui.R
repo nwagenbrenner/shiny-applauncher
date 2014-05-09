@@ -58,12 +58,7 @@ shinyUI(fluidPage(
     column(5, 
           h2('Test WindNinja Interface')   
     )
-    ),
-    fluidRow(
-      column(12, 
-          h4('For testing until Negative Nancy is brave enough to relase the highly anticipated \'WindNinja Inyourface\'')
-      )
-    ),  
+    ), 
 
     hr(),
 
@@ -178,7 +173,7 @@ shinyUI(fluidPage(
     ),
     hr(),
     fluidRow(
-      column(3, h3('3. Output'))
+      column(3, h3('3. Output options'))
     ),
 
     fluidRow(
@@ -204,8 +199,12 @@ shinyUI(fluidPage(
         column(4, htmlOutput('runButtonText'))
       ),
       fluidRow(
-        column(3, htmlOutput('runButton'))
+        column(2, htmlOutput('runButton'))
         #column(2, actionButton('run_wn', img(src = "wn-icon.png", height = 40, width = 40))),
+      ),
+      hr(),
+      fluidRow(
+        column(4, h3('5. Output'))
       ),
       fluidRow(
         progressInit(),
@@ -221,13 +220,20 @@ shinyUI(fluidPage(
       ),
       
       br(),
+
+      fluidRow(
+        column(3,
+          htmlOutput("mapSelection"),
+          br()
+        )
+      ),  
       
-#      fluidRow(
-#      column(12,
-#          br(),
-#          uiOutput('mymap')
-#      )
-#      ),
+      fluidRow(
+      column(12,
+          br(),
+          uiOutput('mymap')
+      )
+      ),
       
       br(),
 
