@@ -291,8 +291,11 @@ cleanup<-reactive({
             unlink("*.asc")
             unlink("*.prj")
             unlink("www/L*")
-            unlink("www/wind_vect.htm")
-            h4("Project space cleaned up.")
+            unlink("www/*.htm")
+            unlink("NCEP*", recursive=TRUE)
+            unlink("dem*")
+            unlink("*.kmz")
+            h4("Project space cleaned up. Click the refresh button in your browser to do another run.")
         }
     #})
 })
@@ -332,6 +335,7 @@ output$cleanupText<-renderUI({
 
                   spdFiles<-(spdFiles[1]) # get the most recent one
                   angFiles<-(angFiles[1]) # get the most recent one
+
               }
               
               for(i in 1:length(spdFiles)){
@@ -352,15 +356,22 @@ output$cleanupText<-renderUI({
               
                   #setProgress(value = 8)
               
-                  t<-str_extract(spdFiles[1], "_[1-9]?[1-9][1-9]m_")
+                  t<-str_extract(spdFiles[1], "_[0-9]?[0-9][0-9]m_")
                   maxlength <- as.numeric(substr(t, 2,(nchar(t)-2)))
 
                   wind_vect=vectorsSP(vectors_sp, maxlength=maxlength, zcol=c('speed','angle'))
               
                   #setProgress(value = 10)
-
-                  #fname<-paste0(substr(spdFiles[i], 5, (nchar(spdFiles[i]) - 8)), ".htm")
-                  fname<-paste0("wind_vect_", i, ".htm")
+                   
+                  if(input$initializationMethod == "wxModelInitialization"){
+                      begin<-str_locate(spdFiles[i], dir)[2] + 6
+                      end<-nchar(spdFiles[i])-8
+                      fname<-paste0(substr(spdFiles[i], begin, end), ".htm")
+                      #fname<-paste0("wind_vect_", i, ".htm")
+                  }
+                  else{
+                      fname<-paste0("domainAverage", substr(spdFiles[i], 4, nchar(spdFiles[i])-8), ".htm")
+                  }
 
                   pal<-colorRampPalette(c("blue","green","yellow", "orange", "red"))
                   m=plotGoogleMaps(wind_vect, filename=fname, zcol='speed', colPalette=pal(5),
@@ -402,9 +413,9 @@ output$cleanupText<-renderUI({
           }
       }
       if(length(list.files(path="www/", pattern=".htm") != 0)){
-         f<-list.files(path="www/", pattern=".htm")[1]
+         #f<-list.files(path="www/", pattern=".htm")[1]
          tags$iframe(
-             srcdoc = paste(readLines(paste0('www/',f)), collapse = '\n'),
+             srcdoc = paste(readLines(paste0('www/',input$windVectFile)), collapse = '\n'),
              width = "100%",
              height = "600px"
         )   
@@ -419,12 +430,12 @@ output$cleanupText<-renderUI({
 #   create map viewing options for wx model runs
 #-------------------------------------------------------------
 createMapSelection <- reactive({
-   if(length(input$run_wn) > 0 || length(list.files(path="www/", pattern=".htm") != 0)){ 
-      #if(input$run_wn==1 && length(list.files(path="www/", pattern=".htm") != 0)){  
+   if((length(input$run_wn) == 0 ||
+       length(input$run_wn) > 0 ) && 
+       length(list.files(path="www/", pattern=".htm") != 0)){ 
           selectInput("windVectFile", "Select forecast to view:",
                       selected=(list.files(path="www/", pattern=".htm")[1]),
-                      c=list.files(path="www/", pattern=".htm"))
-      #}                
+                      c=list.files(path="www/", pattern=".htm"))                
     }
 })
 output$mapSelection <- renderUI({
@@ -745,7 +756,9 @@ output$mapSelection <- renderUI({
 #============================================================================== 
   
     createTestMessage <- reactive({
-      paste("input$demFile$datapath = ", input$demFile$datapath, collapse = "")
+      if(length(input$run_wn) > 0 ){
+      paste("forecastDir = ", forecastDir, collapse = "")
+      }
   })
   output$testMessage <- renderUI({
       createTestMessage()

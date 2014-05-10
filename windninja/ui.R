@@ -242,7 +242,7 @@ shinyUI(fluidPage(
       ),
 
       fluidRow(
-         column(2, 
+         column(12, 
          htmlOutput('cleanupText')
          )
       ),
