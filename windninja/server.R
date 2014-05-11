@@ -546,7 +546,7 @@ output$mapSelection <- renderUI({
 #-------------------------------------------------------------
   createHeightBox <- reactive({
       if(input$initializationMethod == "domainAverageInitialization"){
-          textInputRow("inputWindHeight", "Input height:", "10.0")
+          textInputRow("inputWindHeight", "Input height:", "20.0")
       }
   })
   createUnitsHeightButtons <- reactive({
@@ -576,7 +576,7 @@ output$mapSelection <- renderUI({
       }
   })
   createOutputHeightBox <- reactive({
-      textInputRow("outputWindHeight", "Output height:", "10.0")
+      textInputRow("outputWindHeight", "Output height:", "20.0")
   })
   createUnitsOutputHeightButtons <- reactive({
       #radioButtons("unitsOutputWindHeight", "Units", c("ft" = "ft", "m" = "m"))
@@ -635,33 +635,44 @@ output$mapSelection <- renderUI({
 #   create input option boxes for diurnal and stability
 #-------------------------------------------------------------
   createSpace <- reactive({
-      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
+      if((input$diurnalInput == TRUE || input$stabilityInput == TRUE) &
+          input$initializationMethod != "wxModelInitialization"){
           tags$br()
       }
   })
   createYearbox <- reactive({
-      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
-          textInputRow("year", "Year:", "2014")
+      if((input$diurnalInput == TRUE || input$stabilityInput == TRUE) &
+          input$initializationMethod != "wxModelInitialization"){
+          year <- as.POSIXlt(Sys.time())$year + 1900
+          textInputRow("year", "Year:", year)
       }
   })
   createMonthbox <- reactive({
-      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
-          textInputRow("month", "Month:", "06")
+      if((input$diurnalInput == TRUE || input$stabilityInput == TRUE) &
+          input$initializationMethod != "wxModelInitialization"){
+          month <- as.POSIXlt(Sys.time())$mon + 1
+          textInputRow("month", "Month:", month)
       }
   })
   createDaybox <- reactive({
-      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
-          textInputRow("day", "Day:", "13")
+      if((input$diurnalInput == TRUE || input$stabilityInput == TRUE) &
+          input$initializationMethod != "wxModelInitialization"){
+          day <- as.POSIXlt(Sys.time())$mday
+          textInputRow("day", "Day:", day)
       }
   })
   createHourbox <- reactive({
-      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
-          textInputRow("hour", "Hour:", "15")
+      if((input$diurnalInput == TRUE || input$stabilityInput == TRUE) &
+          input$initializationMethod != "wxModelInitialization"){
+          hour <- as.POSIXlt(Sys.time())$hour
+          textInputRow("hour", "Hour:", hour)
       }
   })
   createMinutebox <- reactive({
-      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
-          textInputRow("minute", "Minute:", "30")
+      if((input$diurnalInput == TRUE || input$stabilityInput == TRUE) &
+          input$initializationMethod != "wxModelInitialization"){
+          min <- as.POSIXlt(Sys.time())$min
+          textInputRow("minute", "Minute:", min)
       }
   })
 
@@ -685,12 +696,12 @@ output$mapSelection <- renderUI({
   })
   
   createInputAirTempBox <- reactive({
-      if(input$diurnalInput == TRUE){
+      if(input$diurnalInput == TRUE & input$initializationMethod != "wxModelInitialization"){
           textInputRow("inputAirTemp", "Air temperature:", "72.0")
       }
   })
   createUnitsAirTempButtons <- reactive({
-      if(input$diurnalInput == TRUE){
+      if(input$diurnalInput == TRUE & input$initializationMethod != "wxModelInitialization"){
           #radioButtons("unitsInputAirTemp", "Units", c("F" = "F", "C" = "C"))
           selectInput("unitsInputAirTemp", "Units:",
                 list("F" = "F", 
@@ -698,13 +709,14 @@ output$mapSelection <- renderUI({
       }
   })
   createInputCloudCoverBox <- reactive({
-      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
+      if((input$diurnalInput == TRUE || input$stabilityInput == TRUE) &
+          input$initializationMethod != "wxModelInitialization"){
           textInputRow("inputCloudCover", "Cloud cover:", "50")
       }
   })
   createUnitsCloudCoverButtons <- reactive({
-      if(input$diurnalInput == TRUE || input$stabilityInput == TRUE){
-          #radioButtons("unitsInputCloudCover", "Units", c("percent" = "percent", "fraction" = "fraction"))
+      if((input$diurnalInput == TRUE || input$stabilityInput == TRUE) &
+          input$initializationMethod != "wxModelInitialization"){
           selectInput("unitsInputCloudCover", "Units:",
                 list("percent" = "percent", 
                      "fraction" = "fraction"))

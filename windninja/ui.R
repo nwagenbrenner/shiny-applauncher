@@ -146,7 +146,7 @@ shinyUI(fluidPage(
     fluidRow( 
       column(3,
 
-        checkboxInput("diurnalInput", "Use diurnal wind", FALSE),
+        checkboxInput("diurnalInput", "Use diurnal wind", TRUE),
         checkboxInput("stabilityInput", "Use non-neutral stability", FALSE),
         
         br(),
