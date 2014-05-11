@@ -274,11 +274,13 @@ shinyServer(function(input, output, session) {
 #  Clean up for another run 
 #-----------------------------------------------------
 createCleanupButton<-reactive({
-    if("windninja.cfg" %in% dir()){
-        actionButton('clean_up', 'Clean Up')
-    }
-    else{
-        h4("")
+    if(length(input$run_wn) > 0 || length(input$run_wn) == 0){
+        if("windninja.cfg" %in% dir()){
+            actionButton('clean_up', 'Clean Up')
+        }
+        else{
+            h4("")
+        }
     }
 })
 output$cleanupButton<-renderUI({
@@ -364,9 +366,25 @@ output$cleanupText<-renderUI({
                   #setProgress(value = 10)
                    
                   if(input$initializationMethod == "wxModelInitialization"){
+                      if(!is.na(str_extract(spdFiles[1], "NAM"))){
+                          model<-"NAM"
+                      }
+                      else if(!is.na(str_extract(spdFiles[1], "NDFD"))){
+                          model<-"NDFD"
+                      }
+                      else if(!is.na(str_extract(spdFiles[1], "RAP"))){
+                          model<-"RAP"
+                      }
+                      else if(!is.na(str_extract(spdFiles[1], "GFS"))){
+                          model<-"GFS"
+                      }
+                      else{
+                          model<-""
+                      }
+
                       begin<-str_locate(spdFiles[i], dir)[2] + 6
                       end<-nchar(spdFiles[i])-8
-                      fname<-paste0(substr(spdFiles[i], begin, end), ".htm")
+                      fname<-paste0(model, "_", substr(spdFiles[i], begin, end), ".htm")
                       #fname<-paste0("wind_vect_", i, ".htm")
                   }
                   else{
@@ -433,7 +451,7 @@ createMapSelection <- reactive({
    if((length(input$run_wn) == 0 ||
        length(input$run_wn) > 0 ) && 
        length(list.files(path="www/", pattern=".htm") != 0)){ 
-          selectInput("windVectFile", "Select forecast to view:",
+          selectInput("windVectFile", "Select a forecast to view:",
                       selected=(list.files(path="www/", pattern=".htm")[1]),
                       c=list.files(path="www/", pattern=".htm"))                
     }
