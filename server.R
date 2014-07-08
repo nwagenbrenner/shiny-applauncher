@@ -29,14 +29,14 @@ shinyServer(function(input, output, session) {
       h4("FVS project created! An email has been sent with the link to your project page.")
   }
   makeHiresWind<-function(){
-      system(paste0("cp -r hiresWind/* ../userWork/", uuid))
-      system2("./mailMessage.bash", c(input$email, uuid, "WindData", "webWindData", input$project))
-      h4("Wind Data project created! An email has been sent with the link to your project page.")
+      #system(paste0("cp -r hiresWind/* ../userWork/", uuid))
+      #just go to hiresWind site...don't need to copy anything to userWork....
+      runUrl( "<http://forest.moscowfsl.wsu.edu:3838/shinyWindToolsTest/>")
   }
   makeLidar<-function(){
-      system(paste0("cp -r lidar/* ../userWork/", uuid))
-      system2("./mailMessage.bash", c(input$email, uuid, "LiDAR", "webLiDAR", input$project))
-      h4("LiDAR Tree Extractor project created! An email has been sent with the link to your project page.")
+      #system(paste0("cp -r lidar/* ../userWork/", uuid))
+      #just go to makeLidar site...don't need to copy anything to userWork....
+      h4("LiDAR Tree Extractor project created!")
   }
 
   
@@ -68,21 +68,82 @@ shinyServer(function(input, output, session) {
               else if(input$shinyApp == "fvs"){
                  makeFVS()
               }
-              else if(input$shinyApp == "hireswind"){
-                 makeHiresWind()
-              }
-              else if(input$shinyApp == "lidar"){
-                 makeLidar()
-              }
           }
   })
+
+  launchApp <- reactive({
+      if(input$shinyApp == "hireswind"){
+                 makeHiresWind()
+      }
+      else if(input$shinyApp == "lidar"){
+                 makeLidar()
+      }
+  })  
+
+  createEmailbox <- reactive({
+      if(input$shinyApp == "windninja" ||
+          input$shinyApp == "windninja_dust" ||
+          input$shinyApp == "fvs"){
+          textInput("email", "Email:", " ")
+      }
+  })
+  createProjectbox <- reactive({
+      if(input$shinyApp == "windninja" ||
+          input$shinyApp == "windninja_dust" ||
+          input$shinyApp == "fvs"){
+          textInput("project", "Project:", " ")
+      }
+  })
+  createAppMessage <- reactive({
+      if(input$shinyApp == "windninja" ||
+          input$shinyApp == "windninja_dust" ||
+          input$shinyApp == "fvs"){
+          em('This application requries a project workspace. Enter your email address and a project name and a custom workspace will be created for you. Note that you only have to set this up once and will be able to return to your project at any time via a link sent to the email address you provide here.')
+      }
+      else{
+          h4(' ')
+      }
+  })
+  createLaunchButton <- reactive({
+      if(input$shinyApp == "windninja" ||
+          input$shinyApp == "windninja_dust" ||
+          input$shinyApp == "fvs"){
+          actionButton('createProject', "Create Project")
+      }
+      else{
+          actionButton('launchApp', "Launch Application")
+      }
+  })
+
+
+  output$launchButton <- renderUI({
+      createLaunchButton()
+  })
+  output$appMessage <- renderUI({
+      createAppMessage()
+  })
+  output$emailField <- renderUI({
+      createEmailbox()
+  })
+  output$projectField <- renderUI({
+      createProjectbox()
+  })
+
   
   addCreateProjectText <- reactive({
-      if(input$createProject > 0){
-          isolate({
-              generateEmail()
-          })
-           
+      if(length(input$createProject) > 0){
+          if(input$createProject > 0){
+              isolate({
+                  generateEmail()
+              })
+          }
+      }
+      else if(length(input$launchApp) > 0){
+          if(input$launchApp > 0){
+              isolate({
+                  launchApp()
+              })
+          }
       }
   })
   

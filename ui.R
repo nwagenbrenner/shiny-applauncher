@@ -16,22 +16,19 @@ shinyUI(bootstrapPage(
     tags$hr(),
     
     row(
-      col(3, h2('Project Creator')),
-      #col(1, img(src = "wn-icon.png", height = 40, width = 40)),
-      #col(1.5, img(src = "burning_ninja_text3_web.png", height = 240, width = 120)),
+      col(5, h2('RMRS Application Center')),
       col(1, img(src = "wn-desktop.ico", height = 40, width = 40)),
       col(1, img(src = "FVSlogo.png", height = 43, width = 43))
     ),
     
     tags$hr(),
-    
+
     row(
-      col(8, h4('1. Choose a project type:'))
+      col(8, h4('Choose your application:'))
     ),
     
-    #tags$br(),
-   
-    row(
+
+   row(
       col(4,
          radioButtons("shinyApp", " ", 
                     c( "WindNinja" = "windninja",
@@ -41,31 +38,30 @@ shinyUI(bootstrapPage(
                        "LiDAR Tree Extractor" = "lidar" ))
          )
        ),
-       
+    tags$br(),
+    row(
+      col(8, 
+         div(style="display:inline-table", htmlOutput("appMessage")) 
+         )
+    ),
     tags$br(),
     
     row(
-      col(8, h4('2. Enter your email address and a project name:'))
+      col(4,
+         div(style="display:inline-table", htmlOutput("emailField"))
+      )
     ),
-    
-    tags$br(),
+    row(
+      col(4,
+         div(style="display:inline-table", htmlOutput("projectField"))
+      )
+    ),
+
+   tags$br(),    
 
     row(
-      col(4,
-         textInput("email", "Email:", " ")
-      )
-    ),
-    row(
-      col(4,
-         textInput("project", "Project:", " ")
-      )
-    ),
-    
-    tags$br(),
-    
-    row(
       col(8,
-        actionButton('createProject', "Create Project")
+        div(style="display:inline-table", htmlOutput("launchButton"))
       )
     ),
     
