@@ -1,4 +1,5 @@
 library(shiny)
+source("prjListEmail.R")
 
 uuid <- ""
 
@@ -139,7 +140,29 @@ shinyServer(function(input, output, session) {
   output$projectText <- renderUI({
       addCreateProjectText()
   })
-  
-  
+
+
+  generateEmail2 <- reactive({
+      if(input$email2 == " "){
+          return(h4("Enter valid email address.", style = "color:red"))
+      }
+      else{
+          #return(h4(paste("the email is", input$email2)))
+          prjListEmail(input$email2)
+      }
+  })
+
+  addProjectListText <- reactive({
+          if(input$projectList > 0){
+              isolate({
+                  generateEmail2()
+              })
+      }
+  })
+
+  output$projectListText <- renderUI({
+      addProjectListText()
+  })
+
 })  
 

@@ -72,7 +72,43 @@ shinyUI(bootstrapPage(
         htmlOutput("projectText")# style = "color:darkblue"),
       )
     ),
+
+    tags$hr(),
     
+    row(
+      col(8,
+        h4("Already have an existing project?")
+      )
+    ),
+
+    row(
+      col(8, 
+          HTML("Get a list of your projects:")
+      )
+    ),
+
+    tags$br(),
+
+    row(
+      col(8, 
+          div(style="display:inline-table", textInput("email2", "Email:", " "))
+      )
+    ),
+
+    tags$br(),
+
+    row(
+      col(8,
+          actionButton('projectList', "Get my projects")
+      )
+    ),
+
+    row(
+      col(8,
+          htmlOutput("projectListText")
+      )
+    ),
+
     tags$hr(),
     
     row(
