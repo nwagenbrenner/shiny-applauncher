@@ -1,4 +1,4 @@
-windninja-shiny
+shiny-applauncher
 ===============
 
-Shiny interface for WindNinja.
+Shiny interface launching RMRS web applications.
