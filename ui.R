@@ -76,18 +76,10 @@ shinyUI(bootstrapPage(
     tags$hr(),
     
     row(
-      col(8,
-        h4("Already have an existing project?")
+      col(12,
+        h4("Already have an existing project? You can request a list of your exisitng projects.")
       )
     ),
-
-    row(
-      col(8, 
-          HTML("Get a list of your projects:")
-      )
-    ),
-
-    tags$br(),
 
     row(
       col(8, 

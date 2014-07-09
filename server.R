@@ -149,6 +149,7 @@ shinyServer(function(input, output, session) {
       else{
           #return(h4(paste("the email is", input$email2)))
           prjListEmail(input$email2)
+          return(h4(paste0("Email sent to ", input$email2, ".")))
       }
   })
 
