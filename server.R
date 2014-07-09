@@ -28,15 +28,6 @@ shinyServer(function(input, output, session) {
       system2("./mailMessage.bash", c(input$email, uuid, "FVS", "webFVS", input$project))
       h4("FVS project created! An email has been sent with the link to your project page.")
   }
-  makeHiresWind<-function(){
-      #system(paste0("cp -r hiresWind/* ../userWork/", uuid))
-      #just go to hiresWind site...don't need to copy anything to userWork....
-      ("http://forest.moscowfsl.wsu.edu:3838/shinyWindToolsTest/")
-  }
-  makeLidar<-function(){
-      #system(paste0("cp -r lidar/* ../userWork/", uuid))
-      #just go to makeLidar site...don't need to copy anything to userWork....
-  }
 
   
   generateEmail <- reactive({
@@ -69,15 +60,7 @@ shinyServer(function(input, output, session) {
               }
           }
   })
-
-  launchApp <- reactive({
-      if(input$shinyApp == "hireswind"){
-                 makeHiresWind()
-      }
-      else if(input$shinyApp == "lidar"){
-                 makeLidar()
-      }
-  })  
+ 
 
   createEmailbox <- reactive({
       if(input$shinyApp == "windninja" ||
