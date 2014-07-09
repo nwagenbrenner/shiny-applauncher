@@ -31,12 +31,11 @@ shinyServer(function(input, output, session) {
   makeHiresWind<-function(){
       #system(paste0("cp -r hiresWind/* ../userWork/", uuid))
       #just go to hiresWind site...don't need to copy anything to userWork....
-      runUrl( "<http://forest.moscowfsl.wsu.edu:3838/shinyWindToolsTest/>")
+      ("http://forest.moscowfsl.wsu.edu:3838/shinyWindToolsTest/")
   }
   makeLidar<-function(){
       #system(paste0("cp -r lidar/* ../userWork/", uuid))
       #just go to makeLidar site...don't need to copy anything to userWork....
-      h4("LiDAR Tree Extractor project created!")
   }
 
   
@@ -111,7 +110,14 @@ shinyServer(function(input, output, session) {
           actionButton('createProject', "Create Project")
       }
       else{
-          actionButton('launchApp', "Launch Application")
+          if(input$shinyApp == "hireswind"){
+              HTML('<a href="http://forest.moscowfsl.wsu.edu:3838/shinyWindToolsTest/">Launch Surface Wind Data Application</a>')
+              #actionButton('launchApp', "Launch Application")
+          }
+          else if(input$shinyApp == "lidar"){
+              HTML('<a href="http://forest.moscowfsl.wsu.edu:3838/LiDARTreeTop/">Launch LiDAR Tree Extractor Application</a>')
+              #actionButton('launchApp', "Launch Application")
+          }
       }
   })
 
