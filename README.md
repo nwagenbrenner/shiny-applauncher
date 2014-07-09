@@ -1,4 +1,4 @@
 shiny-applauncher
 ===============
 
-Shiny interface launching RMRS web applications.
+Shiny interface for launching RMRS web applications.
