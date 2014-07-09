@@ -24,7 +24,7 @@ shinyUI(bootstrapPage(
     tags$hr(),
 
     row(
-      col(8, h4('Choose your application:'))
+      col(8, h4('Choose an application:'))
     ),
     
 
@@ -32,7 +32,7 @@ shinyUI(bootstrapPage(
       col(4,
          radioButtons("shinyApp", " ", 
                     c( "WindNinja" = "windninja",
-                       "WindNinja-Dust" = "windninja_dust", 
+                       "WindNinja-Dust" = "windninja_dust",
                        "Forest Vegetation Simulator" = "fvs",
                        "High-resolution Surface Wind Data Access" = "hireswind",
                        "LiDAR Tree Extractor" = "lidar" ))
@@ -83,13 +83,16 @@ shinyUI(bootstrapPage(
     row(
       tags$br(),
       col(2, HTML('<a href="http://www.firemodels.org/index.php/windninja-introduction">WindNinja</a>')),
-      col(2, HTML('<a href="http://www.fs.fed.us/research/people/profile.php?alias=ncrookston">Contact</a>'))
+      col(8, HTML("nwagenbrenner@fs.fed.us - WindNinja, WindNinja-Dust, Wind Data Access"))
+      #col(2, HTML('<a href="http://www.fs.fed.us/research/people/profile.php?alias=ncrookston">Contact</a>'))
     ),
     row(
-      col(2, HTML('<a href="http://www.fs.fed.us/fmsc/fvs/">FVS</a>'))
+      col(2, HTML('<a href="http://www.fs.fed.us/fmsc/fvs/">FVS</a>')),
+      col(8, HTML("ncrookston.fs@gmail.com - Forest Vegetation Simulator"))
     ),
     row(
-      col(2, HTML('<a href="http://www.firemodels.org/index.php/windwizard-introduction/windwizard-publications">Wind Data Project</a>'))
+      col(2, HTML('<a href="http://www.firemodels.org/index.php/windwizard-introduction/windwizard-publications">Wind Data Project</a>')),
+      col(8, HTML("ahudak@fs.fed.us - LiDAR Tree Extractor"))
     )
   )
 ))
